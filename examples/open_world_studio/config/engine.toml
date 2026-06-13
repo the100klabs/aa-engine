@@ -1,0 +1,16 @@
+[app]
+window_title = "AA Open World Studio"
+target_fps = 60
+
+[render]
+resolution_scale = 1.0
+msaa = 4
+shadow_quality = "high"
+gi = "probes"
+
+[audio]
+master_volume = 1.0
+
+[net]
+default_port = 7777
+max_players = 16

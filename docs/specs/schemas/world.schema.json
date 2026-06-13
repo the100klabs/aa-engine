@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/world.schema.json",
+  "title": "WorldDescriptor",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "bounds_m",
+    "sector_size_m",
+    "active_window",
+    "data_layers",
+    "regions"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "id": { "$ref": "#/$defs/id" },
+    "display_name": { "type": "string" },
+    "description": { "type": "string" },
+    "bounds_m": { "$ref": "#/$defs/bounds" },
+    "sector_size_m": { "type": "number", "exclusiveMinimum": 0 },
+    "active_window": {
+      "type": "object",
+      "required": ["x", "y"],
+      "properties": {
+        "x": { "type": "integer", "minimum": 1 },
+        "y": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "streaming": {
+      "type": "object",
+      "properties": {
+        "max_activations_per_frame": { "type": "integer", "minimum": 1 },
+        "max_deactivations_per_frame": { "type": "integer", "minimum": 1 },
+        "load_latency_budget_ms": { "type": "number", "exclusiveMinimum": 0 },
+        "crossing_hitch_budget_ms": { "type": "number", "exclusiveMinimum": 0 },
+        "multi_source": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "data_layers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/data_layer" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "regions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/region" },
+      "minItems": 1
+    },
+    "budgets": {
+      "type": "object",
+      "properties": {
+        "authored_objects": { "type": "integer", "minimum": 0 },
+        "visible_instanced_props": { "type": "integer", "minimum": 0 },
+        "full_ai_agents": { "type": "integer", "minimum": 0 },
+        "low_lod_agents": { "type": "integer", "minimum": 0 },
+        "memory_mb": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_./-]+$"
+    },
+    "project_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "vec2i": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "vec3": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "bounds": {
+      "type": "object",
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "$ref": "#/$defs/vec3" },
+        "max": { "$ref": "#/$defs/vec3" }
+      },
+      "additionalProperties": false
+    },
+    "data_layer": {
+      "type": "object",
+      "required": ["id", "default_state"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "default_state": { "type": "string", "enum": ["active", "loaded", "unloaded"] },
+        "server_authoritative": { "type": "boolean", "default": true }
+      },
+      "additionalProperties": false
+    },
+    "region": {
+      "type": "object",
+      "required": ["id", "coord", "bounds_m", "sectors"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "coord": { "$ref": "#/$defs/vec2i" },
+        "bounds_m": { "$ref": "#/$defs/bounds" },
+        "sectors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/sector_ref" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "sector_ref": {
+      "type": "object",
+      "required": ["id", "coord", "path"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "coord": { "$ref": "#/$defs/vec2i" },
+        "path": { "$ref": "#/$defs/project_path" },
+        "required_layers": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "priority": { "type": "integer", "minimum": 0, "maximum": 255 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

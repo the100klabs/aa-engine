@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/world_inspect_result.schema.json",
+  "title": "WorldInspectResult",
+  "type": "object",
+  "required": ["ok", "world", "world_asset", "bounds_m", "sector_count", "layers", "sectors", "budgets", "duration_ms"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "world": { "type": "string", "minLength": 1 },
+    "world_asset": { "$ref": "#/$defs/project_path" },
+    "bounds_m": { "$ref": "#/$defs/bounds" },
+    "sector_count": { "type": "integer", "minimum": 0 },
+    "layers": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "sectors": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/sector" }
+    },
+    "budgets": { "$ref": "#/$defs/world_budgets" },
+    "live": { "$ref": "#/$defs/live_state" },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    },
+    "duration_ms": { "type": "integer", "minimum": 0 }
+  },
+  "$defs": {
+    "project_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "vec2i": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "vec3": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "bounds": {
+      "type": "object",
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "$ref": "#/$defs/vec3" },
+        "max": { "$ref": "#/$defs/vec3" }
+      },
+      "additionalProperties": false
+    },
+    "cook_component": {
+      "type": "object",
+      "required": ["present", "stale"],
+      "properties": {
+        "present": { "type": "boolean" },
+        "stale": { "type": "boolean" },
+        "hash": { "type": "string", "minLength": 1 },
+        "artifact": { "$ref": "#/$defs/project_path" }
+      },
+      "additionalProperties": false
+    },
+    "cook_status": {
+      "type": "object",
+      "required": ["render", "physics", "nav", "spawn", "audio", "replication"],
+      "properties": {
+        "render": { "$ref": "#/$defs/cook_component" },
+        "physics": { "$ref": "#/$defs/cook_component" },
+        "nav": { "$ref": "#/$defs/cook_component" },
+        "spawn": { "$ref": "#/$defs/cook_component" },
+        "audio": { "$ref": "#/$defs/cook_component" },
+        "replication": { "$ref": "#/$defs/cook_component" }
+      },
+      "additionalProperties": false
+    },
+    "sector_budgets": {
+      "type": "object",
+      "required": ["entities", "authored_objects", "memory_mb", "load_p95_ms"],
+      "properties": {
+        "entities": { "type": "integer", "minimum": 0 },
+        "authored_objects": { "type": "integer", "minimum": 0 },
+        "visible_instanced_props": { "type": "integer", "minimum": 0 },
+        "full_ai_agents": { "type": "integer", "minimum": 0 },
+        "low_lod_agents": { "type": "integer", "minimum": 0 },
+        "memory_mb": { "type": "number", "minimum": 0 },
+        "load_p95_ms": { "type": "number", "minimum": 0 },
+        "crossing_hitch_ms": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "sector": {
+      "type": "object",
+      "required": ["id", "path", "coord", "bounds_m", "layers", "refs", "cooked", "budgets"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "path": { "$ref": "#/$defs/project_path" },
+        "coord": { "$ref": "#/$defs/vec2i" },
+        "bounds_m": { "$ref": "#/$defs/bounds" },
+        "layers": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/project_path" }
+        },
+        "missing_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/project_path" }
+        },
+        "cooked": { "$ref": "#/$defs/cook_status" },
+        "budgets": { "$ref": "#/$defs/sector_budgets" }
+      },
+      "additionalProperties": false
+    },
+    "world_budgets": {
+      "type": "object",
+      "required": ["authored_objects", "visible_instanced_props", "memory_mb", "load_p95_ms"],
+      "properties": {
+        "authored_objects": { "type": "integer", "minimum": 0 },
+        "visible_instanced_props": { "type": "integer", "minimum": 0 },
+        "full_ai_agents": { "type": "integer", "minimum": 0 },
+        "low_lod_agents": { "type": "integer", "minimum": 0 },
+        "memory_mb": { "type": "number", "minimum": 0 },
+        "load_p95_ms": { "type": "number", "minimum": 0 },
+        "sector_crossing_hitch_ms": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "live_state": {
+      "type": "object",
+      "required": ["connected", "active_sectors", "streaming_sources"],
+      "properties": {
+        "connected": { "type": "boolean" },
+        "active_sectors": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "loaded_sectors": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "streaming_sources": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "pending_loads": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "span": {
+      "type": "object",
+      "properties": {
+        "line": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["code", "severity", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "severity": { "type": "string", "enum": ["error", "warning", "info"] },
+        "message": { "type": "string", "minLength": 1 },
+        "path": { "$ref": "#/$defs/project_path" },
+        "span": { "$ref": "#/$defs/span" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,26 @@
+(
+    schema_version: 1,
+    id: "player_combat",
+    display_name: "Player Combat",
+    priority: 100,
+    blocks_lower_priority: false,
+    bindings: [
+        (
+            action: "Move.Forward",
+            inputs: ["Keyboard.W", "Gamepad.LeftStick.Up"],
+            scale: 1.0,
+            consume: true,
+        ),
+        (
+            action: "Move.Back",
+            inputs: ["Keyboard.S", "Gamepad.LeftStick.Down"],
+            scale: -1.0,
+            consume: true,
+        ),
+        (
+            action: "Ability.Fireball",
+            inputs: ["Mouse.Left", "Gamepad.RightTrigger"],
+            consume: true,
+        ),
+    ],
+)

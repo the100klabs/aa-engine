@@ -1,0 +1,9 @@
+AttributeSet(
+    schema_version: 1,
+    id: "attributes/hero_combat",
+    attributes: [
+        (name: "Health", default: 100.0, min: 0.0, max: 100.0),
+        (name: "Stamina", default: 100.0, min: 0.0, max: 100.0),
+        (name: "DamageMultiplier", default: 1.0),
+    ],
+)

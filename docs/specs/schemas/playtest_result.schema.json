@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/playtest_result.schema.json",
+  "title": "PlaytestResult",
+  "type": "object",
+  "required": ["ok", "scenario", "duration_secs", "assertions", "artifacts"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "scenario": { "type": "string", "minLength": 1 },
+    "duration_secs": { "type": "number", "minimum": 0 },
+    "seed": { "type": "integer", "minimum": 0 },
+    "assertions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/assertion_result" }
+    },
+    "artifacts": { "$ref": "#/$defs/artifacts" },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    },
+    "profile": {
+      "type": "object",
+      "properties": {
+        "frame_p95_ms": { "type": "number", "minimum": 0 },
+        "frame_max_ms": { "type": "number", "minimum": 0 },
+        "sector_load_p95_ms": { "type": "number", "minimum": 0 },
+        "sector_crossing_hitch_ms": { "type": "number", "minimum": 0 },
+        "memory_mb": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "project_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "assertion_result": {
+      "type": "object",
+      "required": ["name", "passed"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "passed": { "type": "boolean" },
+        "expected": {},
+        "actual": {},
+        "message": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "artifacts": {
+      "type": "object",
+      "properties": {
+        "log": { "$ref": "#/$defs/project_path" },
+        "trace": { "$ref": "#/$defs/project_path" },
+        "profile": { "$ref": "#/$defs/project_path" },
+        "screenshot": { "$ref": "#/$defs/project_path" },
+        "video": { "$ref": "#/$defs/project_path" }
+      },
+      "additionalProperties": false
+    },
+    "span": {
+      "type": "object",
+      "properties": {
+        "line": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["code", "severity", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "severity": { "type": "string", "enum": ["error", "warning", "info"] },
+        "message": { "type": "string", "minLength": 1 },
+        "path": { "$ref": "#/$defs/project_path" },
+        "span": { "$ref": "#/$defs/span" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

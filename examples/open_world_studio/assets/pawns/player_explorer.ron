@@ -1,0 +1,15 @@
+(
+    schema_version: 1,
+    id: "player_explorer",
+    display_name: "Player Explorer",
+    physics: (
+        capsule_height: 1.9,
+        capsule_radius: 0.42,
+        max_walk_speed: 520.0,
+        jump_velocity: 420.0,
+        slope_limit_degrees: 48.0,
+    ),
+    attribute_sets: [],
+    input_contexts: [],
+    default_tags: ["Pawn.Player", "Role.Explorer"],
+)

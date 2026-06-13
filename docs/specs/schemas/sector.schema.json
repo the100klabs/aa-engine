@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/sector.schema.json",
+  "title": "SectorDescriptor",
+  "type": "object",
+  "required": ["schema_version", "id", "coord", "bounds", "data_layers"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "id": { "type": "string" },
+    "coord": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "bounds": {
+      "type": "object",
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 },
+        "max": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 }
+      }
+    },
+    "data_layers": { "type": "array", "items": { "type": "string" } },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["prefab", "transform"],
+        "properties": {
+          "prefab": { "type": "string" },
+          "transform": { "type": "object" }
+        }
+      }
+    },
+    "navmesh": { "type": ["string", "null"] },
+    "hlod": { "type": ["string", "null"] }
+  },
+  "additionalProperties": false
+}

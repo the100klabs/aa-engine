@@ -1,0 +1,13 @@
+[package]
+name = "aa_experience"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "AA Engine experience definitions and game feature actions"
+
+[dependencies]
+aa_core = { path = "../aa_core" }
+bevy = { workspace = true }
+ron = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }

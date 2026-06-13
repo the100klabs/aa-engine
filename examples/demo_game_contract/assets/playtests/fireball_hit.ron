@@ -1,0 +1,74 @@
+(
+    schema_version: 1,
+    id: "fireball_hit",
+    display_name: "Fireball Hit",
+    description: "Spawn a player mage, activate fireball against a target dummy, and assert the damage effect is applied through the ability path.",
+    seed: 20260613,
+    duration_secs: 20.0,
+    setup: (
+        LoadExperience: "assets/experiences/demo_combat.ron",
+    ),
+    input_script: [
+        (
+            at_secs: 0.0,
+            action: (
+                SpawnPlayer: (
+                    pawn: "assets/pawns/player_mage.ron",
+                    player_id: 0,
+                    team: 1,
+                    at_spawn_point: "player_start",
+                ),
+            ),
+        ),
+        (
+            at_secs: 1.0,
+            action: (
+                ActivateAbility: (
+                    ability: "assets/abilities/fireball.ron",
+                    player_id: 0,
+                    target: "target_dummy",
+                ),
+            ),
+        ),
+        (
+            at_secs: 1.5,
+            action: (
+                Wait: (
+                    duration_secs: 0.5,
+                ),
+            ),
+        ),
+    ],
+    assertions: [
+        (
+            name: "player_exists",
+            check: (
+                EntityExists: "player_0",
+            ),
+        ),
+        (
+            name: "target_exists",
+            check: (
+                EntityExists: "target_dummy",
+            ),
+        ),
+        (
+            name: "target_health_delta",
+            check: (
+                AttributeDelta: (
+                    target: "target_dummy",
+                    attribute: "Health",
+                    expected_delta: -25.0,
+                    tolerance: 0.01,
+                ),
+            ),
+        ),
+        (
+            name: "no_crash",
+            check: (
+                NoCrash: true,
+            ),
+        ),
+    ],
+    artifacts: ["log", "trace"],
+)

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/attribute_set.schema.json",
+  "title": "AttributeSet",
+  "type": "object",
+  "required": ["schema_version", "id", "attributes"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "id": { "$ref": "#/$defs/id" },
+    "display_name": { "type": "string" },
+    "attributes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/attribute" },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_./-]+$"
+    },
+    "attribute_name": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Za-z0-9_]*$"
+    },
+    "attribute": {
+      "type": "object",
+      "required": ["name", "default", "min", "max", "replicated"],
+      "properties": {
+        "name": { "$ref": "#/$defs/attribute_name" },
+        "default": { "type": "number" },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "replicated": { "type": "boolean" },
+        "description": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "Semantic validation must additionally enforce min <= default <= max and unique attribute names."
+    }
+  ],
+  "additionalProperties": false
+}

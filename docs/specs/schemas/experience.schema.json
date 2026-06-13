@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/experience.schema.json",
+  "title": "ExperienceDefinition",
+  "type": "object",
+  "required": ["schema_version", "id", "default_pawn"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "id": { "type": "string" },
+    "display_name": { "type": "string" },
+    "game_features": { "type": "array", "items": { "type": "string" } },
+    "default_pawn": { "type": "string" },
+    "action_sets": { "type": "array", "items": { "type": "string" } },
+    "actions": { "type": "array", "items": { "$ref": "#/$defs/action" } }
+  },
+  "$defs": {
+    "action": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["GrantAbilitySet"],
+          "properties": {
+            "GrantAbilitySet": {
+              "type": "object",
+              "required": ["abilities"],
+              "properties": {
+                "abilities": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["AddInputContext"],
+          "properties": {
+            "AddInputContext": {
+              "type": "object",
+              "required": ["context"],
+              "properties": { "context": { "type": "string" } }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

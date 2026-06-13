@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/project.schema.json",
+  "title": "AaProjectManifest",
+  "type": "object",
+  "required": ["schema_version", "name", "version", "engine"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "name": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+"
+    },
+    "engine": {
+      "type": "object",
+      "required": ["config_root", "assets_root"],
+      "properties": {
+        "config_root": { "$ref": "#/$defs/relative_path" },
+        "assets_root": { "$ref": "#/$defs/relative_path" },
+        "default_experience": { "$ref": "#/$defs/soft_ref" },
+        "startup_scene": { "$ref": "#/$defs/soft_ref" }
+      },
+      "additionalProperties": false
+    },
+    "plugins": {
+      "type": "object",
+      "properties": {
+        "runtime": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/crate_name" },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "features": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/crate_name" },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "build": {
+      "type": "object",
+      "properties": {
+        "default_binary": { "$ref": "#/$defs/crate_name" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "relative_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "soft_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "crate_name": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+$"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,43 @@
+{
+  "ok": true,
+  "scenario": "smoke",
+  "duration_secs": 15,
+  "seed": 20260613,
+  "assertions": [
+    {
+      "name": "project_manifest_valid",
+      "passed": true,
+      "expected": "aa.project.toml",
+      "actual": "aa.project.toml"
+    },
+    {
+      "name": "demo_game_contract_valid",
+      "passed": true,
+      "expected": "examples/demo_game",
+      "actual": "examples/demo_game"
+    },
+    {
+      "name": "open_world_contract_valid",
+      "passed": true,
+      "expected": "examples/open_world_studio",
+      "actual": "examples/open_world_studio"
+    },
+    {
+      "name": "no_crash",
+      "passed": true,
+      "expected": true,
+      "actual": true,
+      "message": "Bootstrap smoke result proves the agent contract path is callable; runtime smoke remains a gate item."
+    }
+  ],
+  "artifacts": {
+    "log": "artifacts/playtests/smoke.log",
+    "trace": "artifacts/playtests/smoke.trace"
+  },
+  "diagnostics": [],
+  "profile": {
+    "frame_p95_ms": 4.0,
+    "frame_max_ms": 6.0,
+    "memory_mb": 256
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/config_input.schema.json",
+  "title": "AaInputConfig",
+  "type": "object",
+  "required": ["defaults"],
+  "properties": {
+    "defaults": {
+      "type": "object",
+      "required": ["mouse_sensitivity", "gamepad_deadzone"],
+      "properties": {
+        "mouse_sensitivity": { "type": "number", "exclusiveMinimum": 0, "maximum": 100 },
+        "gamepad_deadzone": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

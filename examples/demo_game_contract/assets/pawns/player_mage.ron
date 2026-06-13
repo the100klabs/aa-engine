@@ -1,0 +1,15 @@
+(
+    schema_version: 1,
+    id: "player_mage",
+    display_name: "Player Mage",
+    physics: (
+        capsule_height: 1.8,
+        capsule_radius: 0.35,
+        max_walk_speed: 420.0,
+        jump_velocity: 5.0,
+        slope_limit_degrees: 50.0,
+    ),
+    attribute_sets: ["assets/attributes/combatant.ron"],
+    input_contexts: ["assets/input/contexts/player_combat.ron"],
+    default_tags: ["Pawn.Player", "Role.Mage", "State.Ready"],
+)

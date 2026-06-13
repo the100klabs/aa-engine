@@ -1,0 +1,80 @@
+(
+    schema_version: 1,
+    id: "open_world_enemy_camp",
+    display_name: "Open World Enemy Camp",
+    description: "Smoke playtest proving the starter sector activates, camp guards spawn, and streaming budgets stay within target.",
+    seed: 1337,
+    duration_secs: 30.0,
+    setup: (
+        LoadWorld: "assets/worlds/open_world_studio.ron",
+    ),
+    input_script: [
+        (
+            at_secs: 0.1,
+            action: (
+                SpawnPlayer: (
+                    pawn: "assets/pawns/player_explorer.ron",
+                    player_id: 0,
+                    team: 0,
+                    at_spawn_point: "starter_valley_entry",
+                ),
+            ),
+        ),
+        (
+            at_secs: 3.0,
+            action: (
+                Teleport: (
+                    entity: "player:0",
+                    position: [28.0, 0.0, -20.0],
+                ),
+            ),
+        ),
+        (
+            at_secs: 5.0,
+            action: (
+                Wait: (
+                    duration_secs: 10.0,
+                ),
+            ),
+        ),
+    ],
+    assertions: [
+        (
+            name: "sector_0_0_active",
+            check: (
+                SectorActive: "sector_0_0",
+            ),
+        ),
+        (
+            name: "camp_guard_spawned",
+            check: (
+                EntityExists: "camp_guard_patrol",
+            ),
+        ),
+        (
+            name: "sector_load_budget",
+            check: (
+                BudgetWithin: (
+                    metric: "sector_load_p95_ms",
+                    max: 400.0,
+                ),
+            ),
+        ),
+        (
+            name: "sector_crossing_hitch_budget",
+            check: (
+                BudgetWithin: (
+                    metric: "sector_crossing_hitch_ms",
+                    max: 6.0,
+                ),
+            ),
+        ),
+        (
+            name: "no_crash",
+            check: (
+                NoCrash: true,
+            ),
+        ),
+    ],
+    artifacts: ["log", "trace", "profile"],
+)

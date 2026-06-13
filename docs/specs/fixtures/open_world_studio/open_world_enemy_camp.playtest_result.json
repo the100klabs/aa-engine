@@ -1,0 +1,52 @@
+{
+  "ok": true,
+  "scenario": "open_world_enemy_camp",
+  "duration_secs": 45,
+  "seed": 1337,
+  "assertions": [
+    {
+      "name": "sector_0_0_active",
+      "passed": true,
+      "expected": "active",
+      "actual": "active"
+    },
+    {
+      "name": "camp_guard_spawned",
+      "passed": true,
+      "expected": "camp_guard_0",
+      "actual": "camp_guard_0"
+    },
+    {
+      "name": "sector_load_budget",
+      "passed": true,
+      "expected": 400,
+      "actual": 310
+    },
+    {
+      "name": "sector_crossing_hitch_budget",
+      "passed": true,
+      "expected": 6,
+      "actual": 4.8
+    },
+    {
+      "name": "no_crash",
+      "passed": true,
+      "expected": true,
+      "actual": true
+    }
+  ],
+  "artifacts": {
+    "log": "artifacts/playtests/open_world_enemy_camp.log",
+    "trace": "artifacts/playtests/open_world_enemy_camp.trace",
+    "profile": "artifacts/profiles/open_world_enemy_camp.trace",
+    "screenshot": "artifacts/playtests/open_world_enemy_camp.png"
+  },
+  "diagnostics": [],
+  "profile": {
+    "frame_p95_ms": 12.9,
+    "frame_max_ms": 17.2,
+    "sector_load_p95_ms": 310,
+    "sector_crossing_hitch_ms": 4.8,
+    "memory_mb": 6200
+  }
+}

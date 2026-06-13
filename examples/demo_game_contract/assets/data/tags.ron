@@ -1,0 +1,15 @@
+(
+    schema_version: 1,
+    tags: [
+        "Ability.Fireball",
+        "Cooldown.Fireball",
+        "Cue.Fireball.Impact",
+        "Input.Fire",
+        "Input.Move",
+        "Pawn.Player",
+        "Pawn.Target",
+        "Role.Mage",
+        "State.Ready",
+        "State.Stunned",
+    ],
+)

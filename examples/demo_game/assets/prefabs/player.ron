@@ -1,0 +1,17 @@
+Prefab(
+    schema_version: 1,
+    id: "prefabs/player",
+    children: [
+        (
+            name: Some("Player"),
+            components: {
+                "Transform": (
+                    translation: (0.0, 1.0, 0.0),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "Name": "Player",
+            },
+        ),
+    ],
+)

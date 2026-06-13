@@ -1,0 +1,14 @@
+InputMappingContext(
+    schema_version: 1,
+    id: "input/contexts/shooter",
+    priority: 0,
+    mappings: [
+        (action: "Move", bindings: [Wasd]),
+        (action: "Look", bindings: [MouseDelta]),
+        (action: "Fire", bindings: [MouseLeft]),
+        (action: "Jump", bindings: [KeyboardSpace]),
+        (action: "Ability1", bindings: [KeyboardQ]),
+        (action: "Ability2", bindings: [KeyboardR]),
+        (action: "Ability3", bindings: [KeyboardE]),
+    ],
+)

@@ -1,0 +1,15 @@
+(
+    schema_version: 1,
+    id: "camp_guard",
+    display_name: "Camp Guard",
+    physics: (
+        capsule_height: 1.85,
+        capsule_radius: 0.38,
+        max_walk_speed: 320.0,
+        jump_velocity: 0.0,
+        slope_limit_degrees: 45.0,
+    ),
+    attribute_sets: [],
+    input_contexts: [],
+    default_tags: ["AI.Guard", "Faction.Bandits", "Encounter.Camp"],
+)

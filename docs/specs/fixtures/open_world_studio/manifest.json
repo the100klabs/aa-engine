@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "id": "open_world_studio_fixture_manifest",
+  "fixtures": [
+    {
+      "id": "add_enemy_camp_eval",
+      "fixture": "docs/specs/fixtures/open_world_studio/add_enemy_camp.eval.json",
+      "schema": "docs/specs/schemas/agent_eval.schema.json",
+      "kind": "agent_eval"
+    },
+    {
+      "id": "open_world_enemy_camp_playtest",
+      "fixture": "docs/specs/fixtures/open_world_studio/open_world_enemy_camp.playtest.json",
+      "schema": "docs/specs/schemas/playtest_scenario.schema.json",
+      "kind": "playtest_scenario"
+    },
+    {
+      "id": "add_campfire_scene_patch",
+      "fixture": "docs/specs/fixtures/open_world_studio/add_campfire.scene_patch.json",
+      "schema": "docs/specs/schemas/scene_patch.schema.json",
+      "kind": "scene_patch"
+    },
+    {
+      "id": "world_inspect_result",
+      "fixture": "docs/specs/fixtures/open_world_studio/world_inspect.result.json",
+      "schema": "docs/specs/schemas/world_inspect_result.schema.json",
+      "kind": "world_inspect_result"
+    },
+    {
+      "id": "world_cook_result",
+      "fixture": "docs/specs/fixtures/open_world_studio/world_cook.result.json",
+      "schema": "docs/specs/schemas/world_cook_result.schema.json",
+      "kind": "world_cook_result"
+    },
+    {
+      "id": "profile_summary_result",
+      "fixture": "docs/specs/fixtures/open_world_studio/profile_summary.result.json",
+      "schema": "docs/specs/schemas/profile_summary_result.schema.json",
+      "kind": "profile_summary_result"
+    },
+    {
+      "id": "open_world_enemy_camp_playtest_result",
+      "fixture": "docs/specs/fixtures/open_world_studio/open_world_enemy_camp.playtest_result.json",
+      "schema": "docs/specs/schemas/playtest_result.schema.json",
+      "kind": "playtest_result"
+    }
+  ]
+}

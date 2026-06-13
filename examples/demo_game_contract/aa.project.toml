@@ -1,0 +1,16 @@
+schema_version = 1
+name = "demo_game"
+version = "0.1.0"
+
+[engine]
+config_root = "config"
+assets_root = "assets"
+
+[plugins]
+runtime = []
+
+[features]
+enabled = []
+
+[build]
+default_binary = "demo_game"

@@ -1,0 +1,12 @@
+GameplayAbility(
+    schema_version: 1,
+    id: "abilities/rifle_shot",
+    display_name: "Rifle Shot",
+    cooldown_tags: ["Ability.Cooldown.Rifle"],
+    activation_tags_required: [],
+    activation_tags_blocked: ["State.Stunned", "State.Dead"],
+    cost_effect: None,
+    montage: None,
+    cue_on_activate: Some("GameplayCue.Rifle.Fire"),
+    impl: "rifle_shot",
+)

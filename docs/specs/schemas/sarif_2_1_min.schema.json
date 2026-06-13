@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/sarif_2_1_min.schema.json",
+  "title": "Sarif210Minimum",
+  "type": "object",
+  "required": ["version", "$schema", "runs"],
+  "properties": {
+    "version": { "type": "string", "const": "2.1.0" },
+    "$schema": { "type": "string", "minLength": 1 },
+    "runs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/run" },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "run": {
+      "type": "object",
+      "required": ["tool", "results"],
+      "properties": {
+        "tool": { "$ref": "#/$defs/tool" },
+        "results": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/result" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "tool": {
+      "type": "object",
+      "required": ["driver"],
+      "properties": {
+        "driver": { "$ref": "#/$defs/driver" }
+      },
+      "additionalProperties": false
+    },
+    "driver": {
+      "type": "object",
+      "required": ["name", "semanticVersion", "rules"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "semanticVersion": { "type": "string", "minLength": 1 },
+        "informationUri": { "type": "string", "minLength": 1 },
+        "rules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/rule" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "rule": {
+      "type": "object",
+      "required": ["id", "name", "shortDescription"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "shortDescription": { "$ref": "#/$defs/message" },
+        "helpUri": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "result": {
+      "type": "object",
+      "required": ["ruleId", "level", "message", "locations"],
+      "properties": {
+        "ruleId": { "type": "string", "minLength": 1 },
+        "level": { "type": "string", "enum": ["error", "warning", "note"] },
+        "message": { "$ref": "#/$defs/message" },
+        "locations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/location" },
+          "minItems": 1
+        },
+        "properties": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "location": {
+      "type": "object",
+      "required": ["physicalLocation"],
+      "properties": {
+        "physicalLocation": { "$ref": "#/$defs/physical_location" }
+      },
+      "additionalProperties": false
+    },
+    "physical_location": {
+      "type": "object",
+      "required": ["artifactLocation"],
+      "properties": {
+        "artifactLocation": { "$ref": "#/$defs/artifact_location" },
+        "region": { "$ref": "#/$defs/region" }
+      },
+      "additionalProperties": false
+    },
+    "artifact_location": {
+      "type": "object",
+      "required": ["uri"],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!/)(?!.*\\\\).+$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "region": {
+      "type": "object",
+      "properties": {
+        "startLine": { "type": "integer", "minimum": 1 },
+        "startColumn": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "message": {
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

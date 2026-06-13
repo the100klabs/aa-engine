@@ -1,0 +1,23 @@
+(
+    schema_version: 1,
+    id: "combatant",
+    display_name: "Combatant",
+    attributes: [
+        (
+            name: "Health",
+            default: 100.0,
+            min: 0.0,
+            max: 100.0,
+            replicated: true,
+            description: "Current hit points.",
+        ),
+        (
+            name: "Mana",
+            default: 50.0,
+            min: 0.0,
+            max: 50.0,
+            replicated: true,
+            description: "Ability resource for player-controlled pawns.",
+        ),
+    ],
+)

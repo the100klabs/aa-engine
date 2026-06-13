@@ -1,0 +1,21 @@
+# Shipped with aa_core — lowest-priority config layer (REQ-CORE-010).
+
+[app]
+window_title = "AA Engine"
+target_fps = 60
+
+[render]
+resolution_scale = 1.0
+msaa = 4
+shadow_quality = "medium"
+
+[audio]
+master_volume = 1.0
+
+[net]
+default_port = 7777
+max_players = 16
+
+[gameplay]
+default_damage_scale = 1.0
+respawn_delay_secs = 3.0

@@ -1,0 +1,23 @@
+(
+    schema_version: 1,
+    id: "camp_guard_baseline",
+    duration: (
+        Infinite: (),
+    ),
+    modifiers: [
+        (
+            attribute: "Health.Max",
+            op: "Add",
+            magnitude: 100.0,
+        ),
+        (
+            attribute: "Move.Speed",
+            op: "Override",
+            magnitude: 320.0,
+        ),
+    ],
+    granted_tags: ["State.Ready"],
+    application_tags_required: [],
+    application_tags_blocked: [],
+    cues_on_apply: [],
+)

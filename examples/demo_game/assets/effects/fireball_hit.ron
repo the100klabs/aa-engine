@@ -1,0 +1,12 @@
+GameplayEffect(
+    schema_version: 1,
+    id: "effects/fireball_hit",
+    duration: Instant,
+    modifiers: [
+        (attribute: "Health", op: Add, magnitude: -25.0),
+    ],
+    granted_tags: [],
+    application_tags_required: [],
+    application_tags_blocked: ["State.Dead"],
+    cues_on_apply: ["GameplayCue.Fire.Impact"],
+)

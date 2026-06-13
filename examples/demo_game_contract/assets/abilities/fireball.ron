@@ -1,0 +1,12 @@
+(
+    schema_version: 1,
+    id: "fireball",
+    display_name: "Fireball",
+    cooldown_tags: ["Cooldown.Fireball"],
+    activation_tags_required: ["State.Ready"],
+    activation_tags_blocked: ["State.Stunned"],
+    cost_effect: "assets/effects/fireball_cost.ron",
+    montage: null,
+    cue_on_activate: "Cue.Fireball.Impact",
+    impl: "aa_ability::abilities::fireball",
+)

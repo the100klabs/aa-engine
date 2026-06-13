@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "id": "demo_game_add_fire_ability",
+  "display_name": "Demo Game Add Fire Ability",
+  "description": "Eval fixture for the first Cursor-like studio slice: add a fire ability to demo_game and prove it through validation, check, graph, and playtest commands.",
+  "tier": "studio_alpha",
+  "min_pass_rate": 1.0,
+  "max_repair_attempts": 3,
+  "tasks": [
+    {
+      "id": "EVAL-STUDIO-FIRE-ABILITY-001",
+      "prompt": "Add a fireball ability to demo_game. Use RON ability/effect/tag assets, keep ability state data-driven, and add a fireball_hit playtest proving target Health changes by -25.",
+      "category": "ability",
+      "project": "examples/demo_game_contract",
+      "max_repair_attempts": 3,
+      "required_commands": [
+        "aa index",
+        "aa validate",
+        "aa check",
+        "aa ability graph",
+        "aa playtest"
+      ],
+      "expected_files": [
+        "examples/demo_game_contract/assets/abilities/fireball.ron",
+        "examples/demo_game_contract/assets/effects/fireball_cost.ron",
+        "examples/demo_game_contract/assets/effects/fireball_damage.ron",
+        "examples/demo_game_contract/assets/data/tags.ron",
+        "examples/demo_game_contract/assets/playtests/fireball_hit.ron",
+        "examples/demo_game_contract/assets/pawns/player_mage.ron",
+        "examples/demo_game_contract/assets/pawns/target_dummy.ron",
+        "examples/demo_game_contract/assets/attributes/combatant.ron",
+        "examples/demo_game_contract/assets/input/contexts/player_combat.ron",
+        "examples/demo_game_contract/assets/action_sets/demo_combat.ron",
+        "examples/demo_game_contract/assets/experiences/demo_combat.ron"
+      ],
+      "forbidden_paths": [
+        "target",
+        ".git"
+      ],
+      "acceptance": [
+        { "CommandPasses": "aa index" },
+        { "CommandPasses": "aa validate" },
+        { "CommandPasses": "aa check" },
+        { "CommandPasses": "aa ability graph" },
+        { "PlaytestPasses": "fireball_hit" },
+        { "FileChanged": "examples/demo_game_contract/assets/abilities/fireball.ron" },
+        { "FileChanged": "examples/demo_game_contract/assets/effects/fireball_damage.ron" },
+        { "FileChanged": "examples/demo_game_contract/assets/data/tags.ron" },
+        { "FileChanged": "examples/demo_game_contract/assets/playtests/fireball_hit.ron" },
+        { "NoWritesOutsideAllowlist": true }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+(
+    schema_version: 1,
+    id: "fireball_cost",
+    duration: "Instant",
+    modifiers: [
+        (
+            attribute: "Mana",
+            op: "Add",
+            magnitude: -10.0,
+        ),
+    ],
+    granted_tags: [],
+    application_tags_required: ["State.Ready"],
+    application_tags_blocked: ["State.Stunned"],
+    cues_on_apply: [],
+)

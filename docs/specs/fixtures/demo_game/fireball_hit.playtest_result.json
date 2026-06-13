@@ -1,0 +1,42 @@
+{
+  "ok": true,
+  "scenario": "fireball_hit",
+  "duration_secs": 20,
+  "seed": 20260613,
+  "assertions": [
+    {
+      "name": "player_exists",
+      "passed": true,
+      "expected": "player_0",
+      "actual": "player_0"
+    },
+    {
+      "name": "target_exists",
+      "passed": true,
+      "expected": "target_dummy",
+      "actual": "target_dummy"
+    },
+    {
+      "name": "target_health_delta",
+      "passed": true,
+      "expected": -25,
+      "actual": -25
+    },
+    {
+      "name": "no_crash",
+      "passed": true,
+      "expected": true,
+      "actual": true
+    }
+  ],
+  "artifacts": {
+    "log": "artifacts/playtests/fireball_hit.log",
+    "trace": "artifacts/playtests/fireball_hit.trace"
+  },
+  "diagnostics": [],
+  "profile": {
+    "frame_p95_ms": 4.2,
+    "frame_max_ms": 6.1,
+    "memory_mb": 256
+  }
+}

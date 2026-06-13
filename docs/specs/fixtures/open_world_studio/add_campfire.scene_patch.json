@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "id": "add_campfire_preview",
+  "description": "Dry-run fixture for adding a campfire prefab instance to sector 0/0 without mutating the sector asset.",
+  "target": {
+    "path": "assets/sectors/sector_0_0.ron",
+    "kind": "sector"
+  },
+  "ops": [
+    {
+      "InstantiatePrefab": {
+        "entity_id": "sector_0_0/camp_fire_preview",
+        "prefab": "assets/prefabs/camp_fire.ron",
+        "transform": {
+          "translation": [36.0, 0.0, -14.0],
+          "rotation_euler": [0.0, 20.0, 0.0],
+          "scale": [1.0, 1.0, 1.0]
+        },
+        "reason": "Preview an extra camp prop for the enemy-camp authoring loop."
+      }
+    },
+    {
+      "SetDataLayer": {
+        "entity_id": "sector_0_0/camp_fire_preview",
+        "layer": "encounters",
+        "enabled": true,
+        "reason": "Keep the new prop controlled by the encounter data layer."
+      }
+    }
+  ]
+}

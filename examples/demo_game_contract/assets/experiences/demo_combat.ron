@@ -1,0 +1,20 @@
+(
+    schema_version: 1,
+    id: "demo_combat",
+    display_name: "Demo Combat",
+    game_features: ["feature_demo_combat"],
+    default_pawn: "assets/pawns/player_mage.ron",
+    action_sets: ["assets/action_sets/demo_combat.ron"],
+    actions: [
+        (
+            GrantAbilitySet: (
+                abilities: ["assets/abilities/fireball.ron"],
+            ),
+        ),
+        (
+            AddInputContext: (
+                context: "assets/input/contexts/player_combat.ron",
+            ),
+        ),
+    ],
+)

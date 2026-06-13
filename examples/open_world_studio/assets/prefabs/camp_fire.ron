@@ -1,0 +1,16 @@
+(
+    schema_version: 1,
+    id: "camp_fire",
+    children: [
+        (
+            name: "camp_fire_root",
+            components: (
+                StaticProp: (
+                    tag: "Prop.Camp.Fire",
+                    light_radius_m: 8.0,
+                ),
+            ),
+            children: [],
+        ),
+    ],
+)

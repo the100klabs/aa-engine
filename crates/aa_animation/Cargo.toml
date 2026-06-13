@@ -1,0 +1,11 @@
+[package]
+name = "aa_animation"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "AA Engine locomotion animation state stub"
+
+[dependencies]
+aa_core = { path = "../aa_core" }
+aa_physics = { path = "../aa_physics" }
+bevy = { workspace = true }

@@ -1,0 +1,17 @@
+[presets.low]
+render.resolution_scale = 0.5
+render.shadow_quality = "low"
+render.gi = false
+
+[presets.medium]
+render.resolution_scale = 0.75
+render.shadow_quality = "medium"
+
+[presets.high]
+render.resolution_scale = 1.0
+render.shadow_quality = "high"
+
+[presets.epic]
+render.resolution_scale = 1.0
+render.shadow_quality = "epic"
+render.gi = true

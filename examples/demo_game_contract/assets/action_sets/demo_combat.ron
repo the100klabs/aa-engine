@@ -1,0 +1,23 @@
+(
+    schema_version: 1,
+    id: "demo_combat",
+    display_name: "Demo Combat",
+    actions: [
+        (
+            GrantAbilitySet: (
+                abilities: ["assets/abilities/fireball.ron"],
+            ),
+        ),
+        (
+            AddInputContext: (
+                context: "assets/input/contexts/player_combat.ron",
+                priority: 100,
+            ),
+        ),
+        (
+            AddTags: (
+                tags: ["Ability.Fireball"],
+            ),
+        ),
+    ],
+)

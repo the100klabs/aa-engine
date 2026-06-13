@@ -1,0 +1,15 @@
+(
+    schema_version: 1,
+    id: "target_dummy",
+    display_name: "Target Dummy",
+    physics: (
+        capsule_height: 1.8,
+        capsule_radius: 0.35,
+        max_walk_speed: 0.0,
+        jump_velocity: 0.0,
+        slope_limit_degrees: 50.0,
+    ),
+    attribute_sets: ["assets/attributes/combatant.ron"],
+    input_contexts: [],
+    default_tags: ["Pawn.Target", "State.Ready"],
+)

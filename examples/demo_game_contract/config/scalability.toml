@@ -1,0 +1,19 @@
+[presets.low]
+render.resolution_scale = 0.5
+render.shadow_quality = "low"
+render.gi = "off"
+
+[presets.medium]
+render.resolution_scale = 0.75
+render.shadow_quality = "medium"
+render.gi = "baked"
+
+[presets.high]
+render.resolution_scale = 1.0
+render.shadow_quality = "high"
+render.gi = "probes"
+
+[presets.epic]
+render.resolution_scale = 1.0
+render.shadow_quality = "epic"
+render.gi = "probes_plus"

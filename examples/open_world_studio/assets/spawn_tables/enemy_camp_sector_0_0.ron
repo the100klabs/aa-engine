@@ -1,0 +1,30 @@
+(
+    schema_version: 1,
+    id: "enemy_camp_sector_0_0",
+    display_name: "Enemy Camp Sector 0 0",
+    data_layers: ["encounters"],
+    entries: [
+        (
+            id: "camp_guard_patrol",
+            pawn: "assets/pawns/camp_guard.ron",
+            ai_profile: "assets/ai/camp_guard.ron",
+            prefab: "assets/prefabs/camp_guard_spawn.ron",
+            weight: 1.0,
+            count_min: 2,
+            count_max: 3,
+            spawn_radius_m: 18.0,
+            cooldown_secs: 20.0,
+            tags: ["Encounter.Camp", "Faction.Bandits"],
+            fixed_positions: [
+                [18.0, 0.0, -12.0],
+                [35.0, 0.0, -18.0],
+                [42.0, 0.0, -4.0],
+            ],
+        ),
+    ],
+    budgets: (
+        max_alive: 3,
+        max_spawn_per_activation: 3,
+        memory_budget_mb: 8.0,
+    ),
+)

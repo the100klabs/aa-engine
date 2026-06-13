@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/spawn_table.schema.json",
+  "title": "SpawnTable",
+  "type": "object",
+  "required": ["schema_version", "id", "entries"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "id": { "$ref": "#/$defs/id" },
+    "display_name": { "type": "string" },
+    "data_layers": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entry" },
+      "minItems": 1
+    },
+    "budgets": {
+      "type": "object",
+      "properties": {
+        "max_alive": { "type": "integer", "minimum": 0 },
+        "max_spawn_per_activation": { "type": "integer", "minimum": 0 },
+        "memory_budget_mb": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_./-]+$"
+    },
+    "soft_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "vec3": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "entry": {
+      "type": "object",
+      "required": ["id", "pawn", "weight"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "pawn": { "$ref": "#/$defs/soft_ref" },
+        "ai_profile": { "$ref": "#/$defs/soft_ref" },
+        "prefab": { "$ref": "#/$defs/soft_ref" },
+        "weight": { "type": "number", "exclusiveMinimum": 0 },
+        "count_min": { "type": "integer", "minimum": 0, "default": 1 },
+        "count_max": { "type": "integer", "minimum": 0, "default": 1 },
+        "spawn_radius_m": { "type": "number", "minimum": 0 },
+        "cooldown_secs": { "type": "number", "minimum": 0 },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "fixed_positions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/vec3" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "Semantic validation must enforce count_min <= count_max and resolve pawn, ai_profile, and prefab refs."
+    }
+  ],
+  "additionalProperties": false
+}

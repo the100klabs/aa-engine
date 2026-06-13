@@ -1,0 +1,25 @@
+[package]
+name = "demo_game"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "AA Engine Phase 1 combat vertical slice"
+
+[[bin]]
+name = "demo_game"
+path = "src/main.rs"
+
+[dependencies]
+bevy = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+aa_core = { path = "../../crates/aa_core" }
+aa_assets = { path = "../../crates/aa_assets" }
+aa_scene = { path = "../../crates/aa_scene" }
+aa_tags = { path = "../../crates/aa_tags" }
+aa_input = { path = "../../crates/aa_input" }
+aa_ability = { path = "../../crates/aa_ability" }
+aa_experience = { path = "../../crates/aa_experience" }
+aa_gameplay = { path = "../../crates/aa_gameplay" }
+aa_physics = { path = "../../crates/aa_physics" }
+aa_animation = { path = "../../crates/aa_animation" }

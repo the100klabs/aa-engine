@@ -1,0 +1,246 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/playtest_scenario.schema.json",
+  "title": "PlaytestScenario",
+  "type": "object",
+  "required": ["schema_version", "id", "duration_secs", "setup", "assertions"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "id": { "$ref": "#/$defs/id" },
+    "display_name": { "type": "string" },
+    "description": { "type": "string" },
+    "seed": { "type": "integer", "minimum": 0 },
+    "duration_secs": { "type": "number", "exclusiveMinimum": 0, "maximum": 3600 },
+    "setup": { "$ref": "#/$defs/setup" },
+    "input_script": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/timed_action" },
+      "default": []
+    },
+    "assertions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/assertion" },
+      "minItems": 1
+    },
+    "artifacts": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["log", "trace", "profile", "screenshot", "video"] },
+      "uniqueItems": true,
+      "default": ["log"]
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_./-]+$"
+    },
+    "soft_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "setup": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["LoadScene"],
+          "properties": {
+            "LoadScene": { "$ref": "#/$defs/soft_ref" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["LoadExperience"],
+          "properties": {
+            "LoadExperience": { "$ref": "#/$defs/soft_ref" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["LoadWorld"],
+          "properties": {
+            "LoadWorld": { "$ref": "#/$defs/soft_ref" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "timed_action": {
+      "type": "object",
+      "required": ["at_secs", "action"],
+      "properties": {
+        "at_secs": { "type": "number", "minimum": 0 },
+        "action": { "$ref": "#/$defs/action" }
+      },
+      "additionalProperties": false
+    },
+    "action": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["SpawnPlayer"],
+          "properties": {
+            "SpawnPlayer": {
+              "type": "object",
+              "required": ["pawn"],
+              "properties": {
+                "pawn": { "$ref": "#/$defs/soft_ref" },
+                "player_id": { "type": "integer", "minimum": 0 },
+                "team": { "type": "integer", "minimum": 0 },
+                "at_spawn_point": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["ActivateAbility"],
+          "properties": {
+            "ActivateAbility": {
+              "type": "object",
+              "required": ["ability"],
+              "properties": {
+                "ability": { "$ref": "#/$defs/soft_ref" },
+                "player_id": { "type": "integer", "minimum": 0 },
+                "target": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["Move"],
+          "properties": {
+            "Move": {
+              "type": "object",
+              "required": ["player_id", "x", "y", "duration_secs"],
+              "properties": {
+                "player_id": { "type": "integer", "minimum": 0 },
+                "x": { "type": "number" },
+                "y": { "type": "number" },
+                "duration_secs": { "type": "number", "exclusiveMinimum": 0 }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["Teleport"],
+          "properties": {
+            "Teleport": {
+              "type": "object",
+              "required": ["entity", "position"],
+              "properties": {
+                "entity": { "type": "string" },
+                "position": { "$ref": "#/$defs/vec3" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["Wait"],
+          "properties": {
+            "Wait": {
+              "type": "object",
+              "required": ["duration_secs"],
+              "properties": {
+                "duration_secs": { "type": "number", "exclusiveMinimum": 0 }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "assertion": {
+      "type": "object",
+      "required": ["name", "check"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "check": { "$ref": "#/$defs/check" }
+      },
+      "additionalProperties": false
+    },
+    "check": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["EntityExists"],
+          "properties": {
+            "EntityExists": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["AttributeDelta"],
+          "properties": {
+            "AttributeDelta": {
+              "type": "object",
+              "required": ["target", "attribute", "expected_delta"],
+              "properties": {
+                "target": { "type": "string", "minLength": 1 },
+                "attribute": { "type": "string", "minLength": 1 },
+                "expected_delta": { "type": "number" },
+                "tolerance": { "type": "number", "minimum": 0, "default": 0.01 }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["SectorActive"],
+          "properties": {
+            "SectorActive": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["BudgetWithin"],
+          "properties": {
+            "BudgetWithin": {
+              "type": "object",
+              "required": ["metric", "max"],
+              "properties": {
+                "metric": { "type": "string", "minLength": 1 },
+                "max": { "type": "number" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["NoCrash"],
+          "properties": {
+            "NoCrash": { "type": "boolean", "const": true }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "vec3": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 3,
+      "maxItems": 3
+    }
+  },
+  "additionalProperties": false
+}

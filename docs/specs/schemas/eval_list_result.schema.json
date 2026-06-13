@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/eval_list_result.schema.json",
+  "title": "EvalListResult",
+  "type": "object",
+  "required": ["ok", "suites", "diagnostics", "duration_ms"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "suites": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/suite" }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    },
+    "duration_ms": { "type": "integer", "minimum": 0 }
+  },
+  "$defs": {
+    "project_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "suite": {
+      "type": "object",
+      "required": [
+        "id",
+        "display_name",
+        "description",
+        "tier",
+        "path",
+        "task_count",
+        "categories",
+        "required_commands",
+        "min_pass_rate",
+        "max_repair_attempts"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "display_name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "tier": {
+          "type": "string",
+          "enum": ["studio_alpha", "open_world_alpha", "open_world_beta", "aaa_studio"]
+        },
+        "path": { "$ref": "#/$defs/project_path" },
+        "task_count": { "type": "integer", "minimum": 1 },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "ability",
+              "asset_repair",
+              "compile_repair",
+              "enemy_camp",
+              "biome",
+              "performance",
+              "multiplayer",
+              "new_project"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "required_commands": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "aa index",
+              "aa validate",
+              "aa check",
+              "aa ability graph",
+              "aa scene inspect",
+              "aa scene patch",
+              "aa world inspect",
+              "aa world cook",
+              "aa playtest",
+              "aa profile summarize"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "min_pass_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "max_repair_attempts": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "span": {
+      "type": "object",
+      "properties": {
+        "line": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["code", "severity", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "severity": { "type": "string", "enum": ["error", "warning", "info"] },
+        "message": { "type": "string", "minLength": 1 },
+        "path": { "$ref": "#/$defs/project_path" },
+        "span": { "$ref": "#/$defs/span" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

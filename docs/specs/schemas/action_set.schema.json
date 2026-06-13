@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/action_set.schema.json",
+  "title": "ActionSet",
+  "type": "object",
+  "required": ["schema_version", "id", "actions"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "id": { "$ref": "#/$defs/id" },
+    "display_name": { "type": "string" },
+    "actions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/action" },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_./-]+$"
+    },
+    "soft_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "tag": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_.:-]+$"
+    },
+    "action": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["GrantAbilitySet"],
+          "properties": {
+            "GrantAbilitySet": {
+              "type": "object",
+              "required": ["abilities"],
+              "properties": {
+                "abilities": {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/soft_ref" },
+                  "minItems": 1,
+                  "uniqueItems": true
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["AddInputContext"],
+          "properties": {
+            "AddInputContext": {
+              "type": "object",
+              "required": ["context"],
+              "properties": {
+                "context": { "$ref": "#/$defs/soft_ref" },
+                "priority": { "type": "integer", "minimum": 0 }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["RegisterUiLayout"],
+          "properties": {
+            "RegisterUiLayout": {
+              "type": "object",
+              "required": ["layout"],
+              "properties": {
+                "layout": { "$ref": "#/$defs/soft_ref" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["AddTags"],
+          "properties": {
+            "AddTags": {
+              "type": "object",
+              "required": ["tags"],
+              "properties": {
+                "tags": {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/tag" },
+                  "minItems": 1,
+                  "uniqueItems": true
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["LoadScene"],
+          "properties": {
+            "LoadScene": {
+              "type": "object",
+              "required": ["scene"],
+              "properties": {
+                "scene": { "$ref": "#/$defs/soft_ref" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

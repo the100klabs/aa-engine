@@ -1,0 +1,60 @@
+{
+  "ok": true,
+  "artifact": "artifacts/profiles/open_world_enemy_camp.trace",
+  "capture_secs": 45,
+  "duration_ms": 90,
+  "frame": {
+    "cpu": {
+      "p50_ms": 8.8,
+      "p95_ms": 12.9,
+      "p99_ms": 15.1,
+      "max_ms": 17.2
+    },
+    "gpu": {
+      "p50_ms": 7.6,
+      "p95_ms": 11.2,
+      "p99_ms": 13.4,
+      "max_ms": 15.8
+    },
+    "fps_average": 94
+  },
+  "sector_streaming": {
+    "load_latency": {
+      "p50_ms": 140,
+      "p95_ms": 310,
+      "p99_ms": 375,
+      "max_ms": 410
+    },
+    "crossing_hitch_ms": 4.8,
+    "max_active_sectors": 49,
+    "activation_count": 12,
+    "deactivation_count": 8,
+    "failed_loads": 0
+  },
+  "io": {
+    "read_mb": 940,
+    "write_mb": 0,
+    "requests": 420,
+    "request_latency": {
+      "p50_ms": 1.2,
+      "p95_ms": 7.5,
+      "p99_ms": 12,
+      "max_ms": 20
+    }
+  },
+  "memory": {
+    "peak_mb": 6200,
+    "end_mb": 5800,
+    "streaming_pool_peak_mb": 950,
+    "gpu_peak_mb": 2800
+  },
+  "replication": {
+    "sent_kbps": 80,
+    "received_kbps": 40,
+    "relevancy_culled_entities": 12000,
+    "replicated_entities": 180
+  },
+  "hitches": [],
+  "budget_status": "pass",
+  "diagnostics": []
+}

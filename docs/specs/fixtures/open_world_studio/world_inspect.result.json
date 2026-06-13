@@ -1,0 +1,113 @@
+{
+  "ok": true,
+  "world": "open_world_studio",
+  "world_asset": "assets/worlds/open_world_studio.ron",
+  "bounds_m": {
+    "min": [-2048, 0, -2048],
+    "max": [2048, 1024, 2048]
+  },
+  "sector_count": 64,
+  "layers": [
+    "base",
+    "gameplay",
+    "foliage",
+    "encounters"
+  ],
+  "sectors": [
+    {
+      "id": "sector_0_0",
+      "path": "assets/sectors/sector_0_0.ron",
+      "coord": [0, 0],
+      "bounds_m": {
+        "min": [0, 0, 0],
+        "max": [256, 512, 256]
+      },
+      "layers": [
+        "base",
+        "gameplay",
+        "encounters"
+      ],
+      "refs": [
+        "assets/spawn_tables/enemy_camp_sector_0_0.ron",
+        "assets/ai/camp_guard.ron",
+        "assets/pawns/camp_guard.ron",
+        "assets/prefabs/enemy_camp_small.ron"
+      ],
+      "missing_refs": [],
+      "cooked": {
+        "render": {
+          "present": true,
+          "stale": false,
+          "hash": "sha256:sector00render",
+          "artifact": "artifacts/cook/sector_0_0.render"
+        },
+        "physics": {
+          "present": true,
+          "stale": false,
+          "hash": "sha256:sector00physics",
+          "artifact": "artifacts/cook/sector_0_0.physics"
+        },
+        "nav": {
+          "present": true,
+          "stale": false,
+          "hash": "sha256:sector00nav",
+          "artifact": "artifacts/cook/sector_0_0.nav"
+        },
+        "spawn": {
+          "present": true,
+          "stale": false,
+          "hash": "sha256:sector00spawn",
+          "artifact": "artifacts/cook/sector_0_0.spawn"
+        },
+        "audio": {
+          "present": true,
+          "stale": false,
+          "hash": "sha256:sector00audio",
+          "artifact": "artifacts/cook/sector_0_0.audio"
+        },
+        "replication": {
+          "present": true,
+          "stale": false,
+          "hash": "sha256:sector00replication",
+          "artifact": "artifacts/cook/sector_0_0.replication"
+        }
+      },
+      "budgets": {
+        "entities": 1800,
+        "authored_objects": 4200,
+        "visible_instanced_props": 1200,
+        "full_ai_agents": 8,
+        "low_lod_agents": 24,
+        "memory_mb": 72,
+        "load_p95_ms": 310,
+        "crossing_hitch_ms": 4.8
+      }
+    }
+  ],
+  "budgets": {
+    "authored_objects": 250000,
+    "visible_instanced_props": 100000,
+    "full_ai_agents": 500,
+    "low_lod_agents": 5000,
+    "memory_mb": 4096,
+    "load_p95_ms": 390,
+    "sector_crossing_hitch_ms": 5.8
+  },
+  "live": {
+    "connected": true,
+    "active_sectors": [
+      "sector_0_0"
+    ],
+    "loaded_sectors": [
+      "sector_-1_0",
+      "sector_0_0",
+      "sector_1_0"
+    ],
+    "streaming_sources": [
+      "player_0"
+    ],
+    "pending_loads": []
+  },
+  "diagnostics": [],
+  "duration_ms": 38
+}

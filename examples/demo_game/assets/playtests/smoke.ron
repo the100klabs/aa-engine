@@ -1,0 +1,11 @@
+PlaytestScenario(
+    schema_version: 1,
+    id: "playtests/smoke",
+    display_name: "Combat Smoke",
+    duration_secs: 12.0,
+    assertions: [
+        "player_alive",
+        "dummy_damaged",
+        "ability_fired",
+    ],
+)

@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/validation_result.schema.json",
+  "title": "ValidationResult",
+  "type": "object",
+  "required": ["ok", "error_count", "warning_count", "diagnostics", "duration_ms"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "error_count": { "type": "integer", "minimum": 0 },
+    "warning_count": { "type": "integer", "minimum": 0 },
+    "duration_ms": { "type": "integer", "minimum": 0 },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    },
+    "artifacts": {
+      "type": "object",
+      "properties": {
+        "sarif": { "$ref": "#/$defs/project_path" },
+        "log": { "$ref": "#/$defs/project_path" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "project_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["error", "warning", "info"]
+    },
+    "span": {
+      "type": "object",
+      "properties": {
+        "line": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 },
+        "line_end": { "type": "integer", "minimum": 1 },
+        "column_end": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "related": {
+      "type": "object",
+      "required": ["path", "message"],
+      "properties": {
+        "path": { "$ref": "#/$defs/project_path" },
+        "span": { "$ref": "#/$defs/span" },
+        "message": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["code", "severity", "message", "path"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "severity": { "$ref": "#/$defs/severity" },
+        "message": { "type": "string", "minLength": 1 },
+        "path": { "$ref": "#/$defs/project_path" },
+        "span": { "$ref": "#/$defs/span" },
+        "schema": { "$ref": "#/$defs/project_path" },
+        "help": { "type": "string" },
+        "related": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/related" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

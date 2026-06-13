@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/index_result.schema.json",
+  "title": "IndexQueryResult",
+  "type": "object",
+  "required": ["ok", "query", "hits", "duration_ms"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "query": { "type": "string" },
+    "duration_ms": { "type": "integer", "minimum": 0 },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "index_version": { "type": "string" },
+    "hits": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/hit" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/warning" }
+    }
+  },
+  "$defs": {
+    "project_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "hit_kind": {
+      "type": "string",
+      "enum": [
+        "asset",
+        "code_symbol",
+        "command",
+        "config_key",
+        "doc",
+        "eval",
+        "gate",
+        "playtest",
+        "schema",
+        "scene_entity",
+        "spec",
+        "test"
+      ]
+    },
+    "span": {
+      "type": "object",
+      "required": ["line_start"],
+      "properties": {
+        "line_start": { "type": "integer", "minimum": 1 },
+        "line_end": { "type": "integer", "minimum": 1 },
+        "column_start": { "type": "integer", "minimum": 1 },
+        "column_end": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "relation": {
+      "type": "object",
+      "required": ["kind", "target"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "defines",
+            "depends_on",
+            "implements",
+            "references",
+            "requires",
+            "tests",
+            "validates"
+          ]
+        },
+        "target": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "hit": {
+      "type": "object",
+      "required": ["id", "kind", "path", "score", "summary"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "$ref": "#/$defs/hit_kind" },
+        "path": { "$ref": "#/$defs/project_path" },
+        "title": { "type": "string" },
+        "score": { "type": "number", "minimum": 0 },
+        "summary": { "type": "string" },
+        "span": { "$ref": "#/$defs/span" },
+        "relations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/relation" }
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "stale": { "type": "boolean", "default": false }
+      },
+      "additionalProperties": false
+    },
+    "warning": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 },
+        "path": { "$ref": "#/$defs/project_path" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

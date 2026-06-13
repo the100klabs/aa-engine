@@ -1,0 +1,13 @@
+[package]
+name = "aa_scene"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "AA Engine scene and prefab spawning"
+
+[dependencies]
+aa_core = { path = "../aa_core" }
+bevy = { workspace = true }
+serde = { workspace = true }
+ron = { workspace = true }
+thiserror = { workspace = true }

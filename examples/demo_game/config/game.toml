@@ -1,0 +1,7 @@
+[gameplay]
+default_damage_scale = 1.0
+respawn_delay_secs = 3.0
+
+[teams]
+max_teams = 4
+friendly_fire = false

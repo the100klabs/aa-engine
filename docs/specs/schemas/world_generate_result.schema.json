@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/world_generate_result.schema.json",
+  "title": "WorldGenerateResult",
+  "type": "object",
+  "required": [
+    "ok",
+    "dry_run",
+    "template",
+    "template_version",
+    "name",
+    "output",
+    "planned_files",
+    "planned_assets",
+    "diagnostics",
+    "duration_ms"
+  ],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "dry_run": { "type": "boolean" },
+    "template": { "type": "string", "minLength": 1 },
+    "template_version": { "type": "integer", "minimum": 1 },
+    "name": { "type": "string", "pattern": "^[A-Za-z0-9_./-]+$" },
+    "output": { "$ref": "#/$defs/project_path" },
+    "planned_files": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/planned_file" }
+    },
+    "planned_assets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/planned_asset" }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    },
+    "duration_ms": { "type": "integer", "minimum": 0 }
+  },
+  "$defs": {
+    "project_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "asset_kind": {
+      "type": "string",
+      "enum": ["world", "sector", "playtest", "other"]
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[A-Fa-f0-9]{64}$"
+    },
+    "planned_file": {
+      "type": "object",
+      "required": ["path", "kind", "action", "exists", "bytes", "hash", "schema"],
+      "properties": {
+        "path": { "$ref": "#/$defs/project_path" },
+        "kind": { "$ref": "#/$defs/asset_kind" },
+        "action": { "type": "string", "enum": ["create", "overwrite", "skip"] },
+        "exists": { "type": "boolean" },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "hash": { "$ref": "#/$defs/hash" },
+        "schema": { "$ref": "#/$defs/project_path" },
+        "content_preview": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "planned_asset": {
+      "type": "object",
+      "required": ["id", "kind", "path"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "$ref": "#/$defs/asset_kind" },
+        "path": { "$ref": "#/$defs/project_path" }
+      },
+      "additionalProperties": false
+    },
+    "span": {
+      "type": "object",
+      "properties": {
+        "line": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["code", "severity", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "severity": { "type": "string", "enum": ["error", "warning", "info"] },
+        "message": { "type": "string", "minLength": 1 },
+        "path": { "$ref": "#/$defs/project_path" },
+        "span": { "$ref": "#/$defs/span" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

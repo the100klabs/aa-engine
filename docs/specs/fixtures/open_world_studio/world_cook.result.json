@@ -1,0 +1,53 @@
+{
+  "ok": true,
+  "world": "open_world_studio",
+  "world_asset": "assets/worlds/open_world_studio.ron",
+  "verified": true,
+  "deterministic": true,
+  "sector_count": 64,
+  "source_hash": "sha256:openworldstudio",
+  "artifacts": [
+    {
+      "sector": "sector_0_0",
+      "source_hash": "sha256:sector00source",
+      "render": {
+        "path": "artifacts/cook/sector_0_0.render",
+        "hash": "sha256:sector00render",
+        "verified": true,
+        "bytes": 1048576
+      },
+      "physics": {
+        "path": "artifacts/cook/sector_0_0.physics",
+        "hash": "sha256:sector00physics",
+        "verified": true,
+        "bytes": 262144
+      },
+      "nav": {
+        "path": "artifacts/cook/sector_0_0.nav",
+        "hash": "sha256:sector00nav",
+        "verified": true,
+        "bytes": 196608
+      },
+      "spawn": {
+        "path": "artifacts/cook/sector_0_0.spawn",
+        "hash": "sha256:sector00spawn",
+        "verified": true,
+        "bytes": 32768
+      },
+      "audio": {
+        "path": "artifacts/cook/sector_0_0.audio",
+        "hash": "sha256:sector00audio",
+        "verified": true,
+        "bytes": 65536
+      },
+      "replication": {
+        "path": "artifacts/cook/sector_0_0.replication",
+        "hash": "sha256:sector00replication",
+        "verified": true,
+        "bytes": 16384
+      }
+    }
+  ],
+  "diagnostics": [],
+  "duration_ms": 2100
+}

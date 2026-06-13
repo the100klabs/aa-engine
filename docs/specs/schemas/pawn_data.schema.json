@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/pawn_data.schema.json",
+  "title": "PawnData",
+  "type": "object",
+  "required": ["schema_version", "id", "display_name", "physics"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "id": { "$ref": "#/$defs/id" },
+    "display_name": { "type": "string", "minLength": 1 },
+    "mesh": { "$ref": "#/$defs/soft_ref" },
+    "physics": { "$ref": "#/$defs/physics_profile" },
+    "animation": { "$ref": "#/$defs/animation_profile" },
+    "attribute_sets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/soft_ref" },
+      "uniqueItems": true,
+      "default": []
+    },
+    "input_contexts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/soft_ref" },
+      "uniqueItems": true,
+      "default": []
+    },
+    "default_tags": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "default": []
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_./-]+$"
+    },
+    "soft_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "physics_profile": {
+      "type": "object",
+      "required": ["capsule_height", "capsule_radius", "max_walk_speed", "jump_velocity"],
+      "properties": {
+        "capsule_height": { "type": "number", "exclusiveMinimum": 0 },
+        "capsule_radius": { "type": "number", "exclusiveMinimum": 0 },
+        "max_walk_speed": { "type": "number", "minimum": 0 },
+        "jump_velocity": { "type": "number", "minimum": 0 },
+        "slope_limit_degrees": { "type": "number", "minimum": 0, "maximum": 89.9 }
+      },
+      "additionalProperties": false
+    },
+    "animation_profile": {
+      "type": "object",
+      "required": ["graph", "skeleton"],
+      "properties": {
+        "graph": { "$ref": "#/$defs/soft_ref" },
+        "skeleton": { "$ref": "#/$defs/soft_ref" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

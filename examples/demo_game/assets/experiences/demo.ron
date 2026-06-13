@@ -1,0 +1,18 @@
+ExperienceDefinition(
+    schema_version: 1,
+    id: "experiences/demo",
+    display_name: "Combat Demo",
+    game_features: ["feature_combat_core"],
+    default_pawn: "prefabs/player",
+    action_sets: [],
+    actions: [
+        LoadAttributeSet(path: "attributes/hero_combat"),
+        GrantAbilitySet(abilities: [
+            "abilities/fireball",
+            "abilities/dash",
+            "abilities/rifle_shot",
+            "abilities/heal_burst",
+        ]),
+        AddInputContext(context: "input/contexts/shooter"),
+    ],
+)

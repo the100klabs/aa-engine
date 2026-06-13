@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/agent_eval.schema.json",
+  "title": "AgentEvalSuite",
+  "type": "object",
+  "required": ["schema_version", "id", "tasks"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "id": { "$ref": "#/$defs/id" },
+    "display_name": { "type": "string" },
+    "description": { "type": "string" },
+    "tier": {
+      "type": "string",
+      "enum": ["studio_alpha", "open_world_alpha", "open_world_beta", "aaa_studio"]
+    },
+    "min_pass_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "max_repair_attempts": { "type": "integer", "minimum": 0, "maximum": 20 },
+    "tasks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/task" },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_./-]+$"
+    },
+    "soft_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "task": {
+      "type": "object",
+      "required": ["id", "prompt", "required_commands", "acceptance"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "prompt": { "type": "string", "minLength": 1 },
+        "category": {
+          "type": "string",
+          "enum": [
+            "ability",
+            "asset_repair",
+            "compile_repair",
+            "enemy_camp",
+            "biome",
+            "performance",
+            "multiplayer",
+            "new_project"
+          ]
+        },
+        "project": { "$ref": "#/$defs/soft_ref" },
+        "max_repair_attempts": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "required_commands": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/command" },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "expected_files": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/soft_ref" },
+          "uniqueItems": true
+        },
+        "forbidden_paths": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/soft_ref" },
+          "uniqueItems": true,
+          "default": ["target", ".git"]
+        },
+        "acceptance": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/acceptance" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "command": {
+      "type": "string",
+      "enum": [
+        "aa index",
+        "aa validate",
+        "aa check",
+        "aa ability graph",
+        "aa scene inspect",
+        "aa scene patch",
+        "aa world inspect",
+        "aa world cook",
+        "aa playtest",
+        "aa profile summarize"
+      ]
+    },
+    "acceptance": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["CommandPasses"],
+          "properties": {
+            "CommandPasses": { "$ref": "#/$defs/command" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["PlaytestPasses"],
+          "properties": {
+            "PlaytestPasses": { "$ref": "#/$defs/soft_ref" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["FileChanged"],
+          "properties": {
+            "FileChanged": { "$ref": "#/$defs/soft_ref" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["NoWritesOutsideAllowlist"],
+          "properties": {
+            "NoWritesOutsideAllowlist": { "type": "boolean", "const": true }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["ProfileBudgetWithin"],
+          "properties": {
+            "ProfileBudgetWithin": {
+              "type": "object",
+              "required": ["metric", "max"],
+              "properties": {
+                "metric": { "type": "string", "minLength": 1 },
+                "max": { "type": "number" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

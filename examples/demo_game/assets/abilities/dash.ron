@@ -1,0 +1,12 @@
+GameplayAbility(
+    schema_version: 1,
+    id: "abilities/dash",
+    display_name: "Dash",
+    cooldown_tags: ["Ability.Cooldown.Dash"],
+    activation_tags_required: [],
+    activation_tags_blocked: ["State.Stunned", "State.Dead"],
+    cost_effect: None,
+    montage: None,
+    cue_on_activate: Some("GameplayCue.Movement.Dash"),
+    impl: "dash",
+)

@@ -1,0 +1,16 @@
+(
+    schema_version: 1,
+    id: "fireball_damage",
+    duration: "Instant",
+    modifiers: [
+        (
+            attribute: "Health",
+            op: "Add",
+            magnitude: -25.0,
+        ),
+    ],
+    granted_tags: [],
+    application_tags_required: ["State.Ready"],
+    application_tags_blocked: [],
+    cues_on_apply: ["Cue.Fireball.Impact"],
+)

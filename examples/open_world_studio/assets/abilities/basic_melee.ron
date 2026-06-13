@@ -1,0 +1,12 @@
+(
+    schema_version: 1,
+    id: "basic_melee",
+    display_name: "Basic Melee",
+    cooldown_tags: ["Cooldown.BasicMelee"],
+    activation_tags_required: [],
+    activation_tags_blocked: ["State.Stunned"],
+    cost_effect: null,
+    montage: null,
+    cue_on_activate: null,
+    impl: "aa_ability::abilities::basic_melee",
+)

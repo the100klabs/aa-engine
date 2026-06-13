@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "fixtures": [
+    {
+      "id": "add_fire_ability_eval",
+      "kind": "eval",
+      "fixture": "docs/specs/fixtures/demo_game/add_fire_ability.eval.json",
+      "schema": "docs/specs/schemas/agent_eval.schema.json"
+    },
+    {
+      "id": "fireball_hit_playtest_result",
+      "kind": "playtest_result",
+      "fixture": "docs/specs/fixtures/demo_game/fireball_hit.playtest_result.json",
+      "schema": "docs/specs/schemas/playtest_result.schema.json"
+    },
+    {
+      "id": "smoke_playtest_result",
+      "kind": "playtest_result",
+      "fixture": "docs/specs/fixtures/demo_game/smoke.playtest_result.json",
+      "schema": "docs/specs/schemas/playtest_result.schema.json"
+    }
+  ]
+}

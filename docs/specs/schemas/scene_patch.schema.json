@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/scene_patch.schema.json",
+  "title": "ScenePatch",
+  "type": "object",
+  "required": ["schema_version", "id", "target", "ops"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "id": { "$ref": "#/$defs/id" },
+    "description": { "type": "string" },
+    "target": {
+      "type": "object",
+      "required": ["path"],
+      "properties": {
+        "path": { "$ref": "#/$defs/project_path" },
+        "kind": { "type": "string", "enum": ["scene", "prefab", "sector"] }
+      },
+      "additionalProperties": false
+    },
+    "ops": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/op" },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_./-]+$"
+    },
+    "project_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "entity_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_./:-]+$"
+    },
+    "component_type": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_:.-]+$"
+    },
+    "vec3": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "transform": {
+      "type": "object",
+      "properties": {
+        "translation": { "$ref": "#/$defs/vec3" },
+        "rotation_euler": { "$ref": "#/$defs/vec3" },
+        "scale": { "$ref": "#/$defs/vec3" }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+    "op": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["SpawnEntity"],
+          "properties": {
+            "SpawnEntity": {
+              "type": "object",
+              "required": ["entity_id"],
+              "properties": {
+                "entity_id": { "$ref": "#/$defs/entity_id" },
+                "name": { "type": "string" },
+                "parent": { "$ref": "#/$defs/entity_id" },
+                "transform": { "$ref": "#/$defs/transform" },
+                "components": { "type": "object" },
+                "reason": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["DespawnEntity"],
+          "properties": {
+            "DespawnEntity": {
+              "type": "object",
+              "required": ["entity_id"],
+              "properties": {
+                "entity_id": { "$ref": "#/$defs/entity_id" },
+                "expected_name": { "type": "string" },
+                "recursive": { "type": "boolean", "default": true },
+                "reason": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["InstantiatePrefab"],
+          "properties": {
+            "InstantiatePrefab": {
+              "type": "object",
+              "required": ["entity_id", "prefab"],
+              "properties": {
+                "entity_id": { "$ref": "#/$defs/entity_id" },
+                "prefab": { "$ref": "#/$defs/project_path" },
+                "parent": { "$ref": "#/$defs/entity_id" },
+                "transform": { "$ref": "#/$defs/transform" },
+                "reason": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["SetTransform"],
+          "properties": {
+            "SetTransform": {
+              "type": "object",
+              "required": ["entity_id", "transform"],
+              "properties": {
+                "entity_id": { "$ref": "#/$defs/entity_id" },
+                "transform": { "$ref": "#/$defs/transform" },
+                "expected_old": { "$ref": "#/$defs/transform" },
+                "reason": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["AddComponent"],
+          "properties": {
+            "AddComponent": {
+              "type": "object",
+              "required": ["entity_id", "component", "value"],
+              "properties": {
+                "entity_id": { "$ref": "#/$defs/entity_id" },
+                "component": { "$ref": "#/$defs/component_type" },
+                "value": {},
+                "reason": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["ReplaceComponent"],
+          "properties": {
+            "ReplaceComponent": {
+              "type": "object",
+              "required": ["entity_id", "component", "value"],
+              "properties": {
+                "entity_id": { "$ref": "#/$defs/entity_id" },
+                "component": { "$ref": "#/$defs/component_type" },
+                "expected_old": {},
+                "value": {},
+                "reason": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["RemoveComponent"],
+          "properties": {
+            "RemoveComponent": {
+              "type": "object",
+              "required": ["entity_id", "component"],
+              "properties": {
+                "entity_id": { "$ref": "#/$defs/entity_id" },
+                "component": { "$ref": "#/$defs/component_type" },
+                "expected_old": {},
+                "reason": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["SetDataLayer"],
+          "properties": {
+            "SetDataLayer": {
+              "type": "object",
+              "required": ["entity_id", "layer", "enabled"],
+              "properties": {
+                "entity_id": { "$ref": "#/$defs/entity_id" },
+                "layer": { "type": "string", "minLength": 1 },
+                "enabled": { "type": "boolean" },
+                "reason": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

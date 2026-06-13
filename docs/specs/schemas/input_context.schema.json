@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/input_context.schema.json",
+  "title": "InputContext",
+  "type": "object",
+  "required": ["schema_version", "id", "priority", "bindings"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "id": { "$ref": "#/$defs/id" },
+    "display_name": { "type": "string" },
+    "priority": { "type": "integer", "minimum": 0, "maximum": 10000 },
+    "blocks_lower_priority": { "type": "boolean", "default": false },
+    "bindings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/binding" },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_./-]+$"
+    },
+    "semantic_action": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Za-z0-9_.-]*$"
+    },
+    "input_token": {
+      "type": "string",
+      "pattern": "^(Keyboard|Mouse|Gamepad)\\.[A-Za-z0-9_./+-]+$"
+    },
+    "binding": {
+      "type": "object",
+      "required": ["action", "inputs"],
+      "properties": {
+        "action": { "$ref": "#/$defs/semantic_action" },
+        "inputs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/input_token" },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "scale": { "type": "number", "default": 1 },
+        "deadzone": { "type": "number", "minimum": 0, "maximum": 1 },
+        "consume": { "type": "boolean", "default": true }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

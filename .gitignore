@@ -1,0 +1,13 @@
+/target/
+**/*.rs.bk
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+__pycache__/
+*.pyc
+.pytest_cache/
+examples/demo_game/playtest_report.json
+*.log
+*.trace

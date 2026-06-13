@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/profile_summary_result.schema.json",
+  "title": "ProfileSummaryResult",
+  "type": "object",
+  "required": ["ok", "artifact", "duration_ms", "frame", "sector_streaming", "io", "memory", "replication", "hitches"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "artifact": { "$ref": "#/$defs/project_path" },
+    "capture_secs": { "type": "number", "minimum": 0 },
+    "duration_ms": { "type": "integer", "minimum": 0 },
+    "frame": { "$ref": "#/$defs/frame_summary" },
+    "sector_streaming": { "$ref": "#/$defs/sector_streaming_summary" },
+    "io": { "$ref": "#/$defs/io_summary" },
+    "memory": { "$ref": "#/$defs/memory_summary" },
+    "replication": { "$ref": "#/$defs/replication_summary" },
+    "hitches": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/hitch" }
+    },
+    "budget_status": {
+      "type": "string",
+      "enum": ["pass", "warn", "fail", "unknown"]
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    }
+  },
+  "$defs": {
+    "project_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "percentile_ms": {
+      "type": "object",
+      "required": ["p50_ms", "p95_ms", "p99_ms", "max_ms"],
+      "properties": {
+        "p50_ms": { "type": "number", "minimum": 0 },
+        "p95_ms": { "type": "number", "minimum": 0 },
+        "p99_ms": { "type": "number", "minimum": 0 },
+        "max_ms": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "frame_summary": {
+      "type": "object",
+      "required": ["cpu", "gpu"],
+      "properties": {
+        "cpu": { "$ref": "#/$defs/percentile_ms" },
+        "gpu": { "$ref": "#/$defs/percentile_ms" },
+        "fps_average": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "sector_streaming_summary": {
+      "type": "object",
+      "required": ["load_latency", "crossing_hitch_ms", "max_active_sectors"],
+      "properties": {
+        "load_latency": { "$ref": "#/$defs/percentile_ms" },
+        "crossing_hitch_ms": { "type": "number", "minimum": 0 },
+        "max_active_sectors": { "type": "integer", "minimum": 0 },
+        "activation_count": { "type": "integer", "minimum": 0 },
+        "deactivation_count": { "type": "integer", "minimum": 0 },
+        "failed_loads": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "io_summary": {
+      "type": "object",
+      "required": ["read_mb", "requests", "request_latency"],
+      "properties": {
+        "read_mb": { "type": "number", "minimum": 0 },
+        "write_mb": { "type": "number", "minimum": 0 },
+        "requests": { "type": "integer", "minimum": 0 },
+        "request_latency": { "$ref": "#/$defs/percentile_ms" }
+      },
+      "additionalProperties": false
+    },
+    "memory_summary": {
+      "type": "object",
+      "required": ["peak_mb", "end_mb"],
+      "properties": {
+        "peak_mb": { "type": "number", "minimum": 0 },
+        "end_mb": { "type": "number", "minimum": 0 },
+        "streaming_pool_peak_mb": { "type": "number", "minimum": 0 },
+        "gpu_peak_mb": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "replication_summary": {
+      "type": "object",
+      "required": ["sent_kbps", "received_kbps", "relevancy_culled_entities"],
+      "properties": {
+        "sent_kbps": { "type": "number", "minimum": 0 },
+        "received_kbps": { "type": "number", "minimum": 0 },
+        "relevancy_culled_entities": { "type": "integer", "minimum": 0 },
+        "replicated_entities": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "hitch": {
+      "type": "object",
+      "required": ["at_secs", "duration_ms", "kind"],
+      "properties": {
+        "at_secs": { "type": "number", "minimum": 0 },
+        "duration_ms": { "type": "number", "minimum": 0 },
+        "kind": {
+          "type": "string",
+          "enum": ["frame", "sector_load", "sector_activation", "asset_io", "shader", "physics", "unknown"]
+        },
+        "sector": { "type": "string", "minLength": 1 },
+        "message": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "span": {
+      "type": "object",
+      "properties": {
+        "line": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["code", "severity", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "severity": { "type": "string", "enum": ["error", "warning", "info"] },
+        "message": { "type": "string", "minLength": 1 },
+        "path": { "$ref": "#/$defs/project_path" },
+        "span": { "$ref": "#/$defs/span" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

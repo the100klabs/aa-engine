@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/ability_graph_result.schema.json",
+  "title": "AbilityGraphResult",
+  "type": "object",
+  "required": ["ok", "ability_id", "nodes", "edges", "diagnostics", "duration_ms"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "ability_id": { "type": "string", "minLength": 1 },
+    "ability_asset": { "$ref": "#/$defs/project_path" },
+    "nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "edges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/edge" }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    },
+    "duration_ms": { "type": "integer", "minimum": 0 }
+  },
+  "$defs": {
+    "project_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "node": {
+      "type": "object",
+      "required": ["id", "kind", "label"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": {
+          "type": "string",
+          "enum": ["ability", "effect", "tag", "registrar", "ai_profile", "action_set", "experience", "diagnostic"]
+        },
+        "label": { "type": "string", "minLength": 1 },
+        "path": { "$ref": "#/$defs/project_path" },
+        "metadata": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "edge": {
+      "type": "object",
+      "required": ["from", "to", "kind"],
+      "properties": {
+        "from": { "type": "string", "minLength": 1 },
+        "to": { "type": "string", "minLength": 1 },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "implements",
+            "costs",
+            "requires_tag",
+            "blocked_by_tag",
+            "cooldown_tag",
+            "grants_tag",
+            "used_by"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["code", "severity", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "severity": { "type": "string", "enum": ["error", "warning", "info"] },
+        "message": { "type": "string", "minLength": 1 },
+        "path": { "$ref": "#/$defs/project_path" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

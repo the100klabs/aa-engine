@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/asset_manifest.schema.json",
+  "title": "AssetManifest",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "assets"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "generator": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "assets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/asset" },
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "asset_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^(sha256|blake3):[A-Fa-f0-9]{16,}$"
+    },
+    "asset_kind": {
+      "type": "string",
+      "enum": [
+        "ability",
+        "action_set",
+        "ai_profile",
+        "animation_graph",
+        "audio",
+        "config",
+        "effect",
+        "eval",
+        "experience",
+        "input_context",
+        "material",
+        "mesh",
+        "pawn",
+        "playtest",
+        "prefab",
+        "scene",
+        "sector",
+        "shader",
+        "spawn_table",
+        "tag_dictionary",
+        "texture",
+        "world",
+        "other"
+      ]
+    },
+    "cook_artifact": {
+      "type": "object",
+      "required": ["kind", "path", "hash"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["render", "physics", "nav", "spawn", "audio", "replication", "profile", "other"]
+        },
+        "path": { "$ref": "#/$defs/asset_id" },
+        "hash": { "$ref": "#/$defs/hash" }
+      },
+      "additionalProperties": false
+    },
+    "asset": {
+      "type": "object",
+      "required": ["id", "kind", "path", "hash", "deps"],
+      "properties": {
+        "id": { "$ref": "#/$defs/asset_id" },
+        "kind": { "$ref": "#/$defs/asset_kind" },
+        "path": { "$ref": "#/$defs/asset_id" },
+        "hash": { "$ref": "#/$defs/hash" },
+        "schema_version": { "type": "integer", "minimum": 1 },
+        "generated": { "type": "boolean", "default": false },
+        "deps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/asset_id" },
+          "uniqueItems": true
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "cook_artifacts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/cook_artifact" },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

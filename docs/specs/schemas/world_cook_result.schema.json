@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/world_cook_result.schema.json",
+  "title": "WorldCookResult",
+  "type": "object",
+  "required": ["ok", "world", "world_asset", "verified", "sector_count", "artifacts", "duration_ms"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "world": { "type": "string", "minLength": 1 },
+    "world_asset": { "$ref": "#/$defs/project_path" },
+    "verified": { "type": "boolean" },
+    "deterministic": { "type": "boolean" },
+    "sector_count": { "type": "integer", "minimum": 0 },
+    "source_hash": { "type": "string", "minLength": 1 },
+    "artifacts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/sector_artifacts" }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    },
+    "duration_ms": { "type": "integer", "minimum": 0 }
+  },
+  "$defs": {
+    "project_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "cook_artifact": {
+      "type": "object",
+      "required": ["path", "hash", "verified"],
+      "properties": {
+        "path": { "$ref": "#/$defs/project_path" },
+        "hash": { "type": "string", "minLength": 1 },
+        "verified": { "type": "boolean" },
+        "bytes": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "sector_artifacts": {
+      "type": "object",
+      "required": ["sector", "source_hash", "render", "physics", "nav", "spawn", "audio", "replication"],
+      "properties": {
+        "sector": { "type": "string", "minLength": 1 },
+        "source_hash": { "type": "string", "minLength": 1 },
+        "render": { "$ref": "#/$defs/cook_artifact" },
+        "physics": { "$ref": "#/$defs/cook_artifact" },
+        "nav": { "$ref": "#/$defs/cook_artifact" },
+        "spawn": { "$ref": "#/$defs/cook_artifact" },
+        "audio": { "$ref": "#/$defs/cook_artifact" },
+        "replication": { "$ref": "#/$defs/cook_artifact" }
+      },
+      "additionalProperties": false
+    },
+    "span": {
+      "type": "object",
+      "properties": {
+        "line": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["code", "severity", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "severity": { "type": "string", "enum": ["error", "warning", "info"] },
+        "message": { "type": "string", "minLength": 1 },
+        "path": { "$ref": "#/$defs/project_path" },
+        "span": { "$ref": "#/$defs/span" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

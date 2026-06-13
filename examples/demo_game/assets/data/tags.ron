@@ -1,0 +1,16 @@
+TagDictionary(
+    schema_version: 1,
+    tags: [
+        "State.Stunned",
+        "State.Dead",
+        "State.Debuff.Burning",
+        "Faction.Player",
+        "Faction.Enemy",
+        "Game.Mode.Demo",
+        "Ability.Cooldown.Fireball",
+        "Ability.Cooldown.Dash",
+        "Ability.Cooldown.Rifle",
+        "Ability.Cooldown.Heal",
+        "Damage.Fire",
+    ],
+)

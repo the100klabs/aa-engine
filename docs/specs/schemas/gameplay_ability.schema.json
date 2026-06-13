@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/gameplay_ability.schema.json",
+  "title": "GameplayAbility",
+  "type": "object",
+  "required": ["schema_version", "id", "impl"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "id": { "type": "string", "pattern": "^[a-z0-9_./-]+$" },
+    "display_name": { "type": "string" },
+    "cooldown_tags": { "type": "array", "items": { "type": "string" } },
+    "activation_tags_required": { "type": "array", "items": { "type": "string" } },
+    "activation_tags_blocked": { "type": "array", "items": { "type": "string" } },
+    "cost_effect": { "type": ["string", "null"] },
+    "montage": { "type": ["string", "null"] },
+    "cue_on_activate": { "type": ["string", "null"] },
+    "impl": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+"""Project-local AA bootstrap shim.
+
+This keeps AA Engine commands explicit as `./aa ...` until the Rust `aa_cli`
+crate is approved and installed as the real `aa` executable.
+"""
+
+from __future__ import annotations
+
+import os
+import sys
+from pathlib import Path
+
+
+def main() -> None:
+    repo_root = Path(__file__).resolve().parent
+    bootstrap = repo_root / "docs/specs/tools/aa_bootstrap.py"
+    os.execv(sys.executable, [sys.executable, str(bootstrap), *sys.argv[1:]])
+
+
+if __name__ == "__main__":
+    main()

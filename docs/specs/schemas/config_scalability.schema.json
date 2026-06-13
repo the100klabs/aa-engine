@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/config_scalability.schema.json",
+  "title": "AaScalabilityConfig",
+  "type": "object",
+  "required": ["presets"],
+  "properties": {
+    "presets": {
+      "type": "object",
+      "required": ["low", "medium", "high", "epic"],
+      "properties": {
+        "low": { "$ref": "#/$defs/preset" },
+        "medium": { "$ref": "#/$defs/preset" },
+        "high": { "$ref": "#/$defs/preset" },
+        "epic": { "$ref": "#/$defs/preset" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "preset": {
+      "type": "object",
+      "required": ["render"],
+      "properties": {
+        "render": {
+          "type": "object",
+          "required": ["resolution_scale", "shadow_quality", "gi"],
+          "properties": {
+            "resolution_scale": { "type": "number", "exclusiveMinimum": 0, "maximum": 2 },
+            "shadow_quality": { "type": "string", "enum": ["low", "medium", "high", "epic"] },
+            "gi": { "type": "string", "enum": ["off", "baked", "probes", "probes_plus"] }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

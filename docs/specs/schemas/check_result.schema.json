@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/check_result.schema.json",
+  "title": "CheckResult",
+  "type": "object",
+  "required": ["ok", "error_count", "warning_count", "diagnostics", "duration_ms"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "error_count": { "type": "integer", "minimum": 0 },
+    "warning_count": { "type": "integer", "minimum": 0 },
+    "duration_ms": { "type": "integer", "minimum": 0 },
+    "workspace": { "$ref": "#/$defs/project_path" },
+    "command": { "type": "string" },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    },
+    "artifacts": {
+      "type": "object",
+      "properties": {
+        "log": { "$ref": "#/$defs/project_path" },
+        "json": { "$ref": "#/$defs/project_path" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "project_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["error", "warning", "note", "help"]
+    },
+    "span": {
+      "type": "object",
+      "required": ["path", "line_start", "column_start"],
+      "properties": {
+        "path": { "$ref": "#/$defs/project_path" },
+        "line_start": { "type": "integer", "minimum": 1 },
+        "line_end": { "type": "integer", "minimum": 1 },
+        "column_start": { "type": "integer", "minimum": 1 },
+        "column_end": { "type": "integer", "minimum": 1 },
+        "is_primary": { "type": "boolean" },
+        "label": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "suggestion": {
+      "type": "object",
+      "required": ["path", "replacement"],
+      "properties": {
+        "path": { "$ref": "#/$defs/project_path" },
+        "line_start": { "type": "integer", "minimum": 1 },
+        "line_end": { "type": "integer", "minimum": 1 },
+        "column_start": { "type": "integer", "minimum": 1 },
+        "column_end": { "type": "integer", "minimum": 1 },
+        "replacement": { "type": "string" },
+        "applicability": {
+          "type": "string",
+          "enum": ["machine_applicable", "maybe_incorrect", "has_placeholders", "unspecified"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["code", "severity", "message"],
+      "properties": {
+        "code": { "type": "string" },
+        "severity": { "$ref": "#/$defs/severity" },
+        "message": { "type": "string", "minLength": 1 },
+        "package": { "type": "string" },
+        "target": { "type": "string" },
+        "spans": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/span" }
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["severity", "message"],
+            "properties": {
+              "severity": { "$ref": "#/$defs/severity" },
+              "message": { "type": "string", "minLength": 1 },
+              "spans": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/span" }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "suggestions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/suggestion" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

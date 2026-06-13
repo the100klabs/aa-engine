@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/scene_patch_result.schema.json",
+  "title": "ScenePatchResult",
+  "type": "object",
+  "required": ["ok", "dry_run", "patch_id", "target", "affected_files", "affected_entities", "ops", "undo_token", "diagnostics", "duration_ms"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "dry_run": { "type": "boolean" },
+    "patch_id": { "type": "string", "minLength": 1 },
+    "target": { "$ref": "#/$defs/project_path" },
+    "affected_files": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/project_path" },
+      "uniqueItems": true
+    },
+    "affected_entities": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "ops": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/op_report" }
+    },
+    "undo_token": { "type": "string", "minLength": 1 },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    },
+    "duration_ms": { "type": "integer", "minimum": 0 }
+  },
+  "$defs": {
+    "project_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "op_report": {
+      "type": "object",
+      "required": ["index", "kind", "entity_id"],
+      "properties": {
+        "index": { "type": "integer", "minimum": 0 },
+        "kind": { "type": "string", "minLength": 1 },
+        "entity_id": { "type": "string", "minLength": 1 },
+        "affected_files": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/project_path" },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "span": {
+      "type": "object",
+      "properties": {
+        "line": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["code", "severity", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "severity": { "type": "string", "enum": ["error", "warning", "info"] },
+        "message": { "type": "string", "minLength": 1 },
+        "path": { "$ref": "#/$defs/project_path" },
+        "span": { "$ref": "#/$defs/span" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

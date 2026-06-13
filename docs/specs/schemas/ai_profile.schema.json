@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/ai_profile.schema.json",
+  "title": "AiProfile",
+  "type": "object",
+  "required": ["schema_version", "id", "behavior", "lod"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "id": { "$ref": "#/$defs/id" },
+    "display_name": { "type": "string" },
+    "behavior": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["passive", "patrol", "guard", "ranged_combat", "melee_combat", "boss"]
+        },
+        "patrol_route": { "$ref": "#/$defs/soft_ref" },
+        "home_radius_m": { "type": "number", "minimum": 0 },
+        "engage_radius_m": { "type": "number", "minimum": 0 },
+        "disengage_radius_m": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "perception": {
+      "type": "object",
+      "properties": {
+        "sight_radius_m": { "type": "number", "minimum": 0 },
+        "hearing_radius_m": { "type": "number", "minimum": 0 },
+        "field_of_view_degrees": { "type": "number", "minimum": 0, "maximum": 360 }
+      },
+      "additionalProperties": false
+    },
+    "combat": {
+      "type": "object",
+      "properties": {
+        "preferred_range_m": { "type": "number", "minimum": 0 },
+        "abilities": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/soft_ref" },
+          "uniqueItems": true
+        },
+        "effects_on_spawn": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/soft_ref" },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "lod": {
+      "type": "object",
+      "required": ["full_radius_m", "simplified_radius_m", "dormant_radius_m"],
+      "properties": {
+        "full_radius_m": { "type": "number", "minimum": 0 },
+        "simplified_radius_m": { "type": "number", "minimum": 0 },
+        "dormant_radius_m": { "type": "number", "minimum": 0 },
+        "despawn_radius_m": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_./-]+$"
+    },
+    "soft_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    }
+  },
+  "additionalProperties": false
+}

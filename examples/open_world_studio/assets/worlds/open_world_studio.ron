@@ -1,0 +1,65 @@
+(
+    schema_version: 1,
+    id: "open_world_studio",
+    display_name: "Open World Studio",
+    description: "Minimal open-world project used by AA agent and streaming evaluation fixtures.",
+    bounds_m: (
+        min: [-512.0, 0.0, -512.0],
+        max: [512.0, 256.0, 512.0],
+    ),
+    sector_size_m: 256.0,
+    active_window: (
+        x: 3,
+        y: 3,
+    ),
+    streaming: (
+        max_activations_per_frame: 1,
+        max_deactivations_per_frame: 1,
+        load_latency_budget_ms: 400.0,
+        crossing_hitch_budget_ms: 6.0,
+        multi_source: true,
+    ),
+    data_layers: [
+        (
+            id: "terrain",
+            default_state: "loaded",
+            server_authoritative: true,
+        ),
+        (
+            id: "gameplay",
+            default_state: "active",
+            server_authoritative: true,
+        ),
+        (
+            id: "encounters",
+            default_state: "loaded",
+            server_authoritative: true,
+        ),
+    ],
+    regions: [
+        (
+            id: "starter_valley",
+            coord: [0, 0],
+            bounds_m: (
+                min: [-128.0, 0.0, -128.0],
+                max: [128.0, 96.0, 128.0],
+            ),
+            sectors: [
+                (
+                    id: "sector_0_0",
+                    coord: [0, 0],
+                    path: "assets/sectors/sector_0_0.ron",
+                    required_layers: ["terrain", "gameplay", "encounters"],
+                    priority: 255,
+                ),
+            ],
+        ),
+    ],
+    budgets: (
+        authored_objects: 200,
+        visible_instanced_props: 2000,
+        full_ai_agents: 12,
+        low_lod_agents: 48,
+        memory_mb: 256.0,
+    ),
+)

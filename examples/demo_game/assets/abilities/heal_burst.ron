@@ -1,0 +1,12 @@
+GameplayAbility(
+    schema_version: 1,
+    id: "abilities/heal_burst",
+    display_name: "Heal Burst",
+    cooldown_tags: ["Ability.Cooldown.Heal"],
+    activation_tags_required: [],
+    activation_tags_blocked: ["State.Dead"],
+    cost_effect: None,
+    montage: None,
+    cue_on_activate: Some("GameplayCue.Heal.Cast"),
+    impl: "heal_burst",
+)

@@ -1,0 +1,28 @@
+schema_version = 1
+name = "aa_engine"
+version = "0.1.0"
+
+[engine]
+config_root = "config"
+assets_root = "assets"
+
+[plugins]
+runtime = [
+    "aa_core",
+    "aa_assets",
+    "aa_tags",
+    "aa_input",
+    "aa_ability",
+    "aa_experience",
+    "aa_scene",
+    "aa_gameplay",
+    "aa_physics",
+    "aa_animation",
+    "aa_net",
+]
+
+[features]
+enabled = []
+
+[build]
+default_binary = "demo_game"

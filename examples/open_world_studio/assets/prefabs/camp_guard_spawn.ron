@@ -1,0 +1,16 @@
+(
+    schema_version: 1,
+    id: "camp_guard_spawn",
+    children: [
+        (
+            name: "camp_guard_spawn_marker",
+            components: (
+                SpawnMarker: (
+                    radius_m: 18.0,
+                    data_layer: "encounters",
+                ),
+            ),
+            children: [],
+        ),
+    ],
+)

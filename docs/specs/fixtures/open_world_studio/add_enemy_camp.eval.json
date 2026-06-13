@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "id": "open_world_studio_enemy_camp",
+  "display_name": "Open World Studio Enemy Camp",
+  "description": "Eval fixture for adding a sector-authored enemy camp through the Cursor-like agent loop.",
+  "tier": "open_world_alpha",
+  "min_pass_rate": 1.0,
+  "max_repair_attempts": 3,
+  "tasks": [
+    {
+      "id": "EVAL-OWA-ENEMY-CAMP-001",
+      "prompt": "Add a small enemy camp to sector 0/0 in open_world_studio. Use spawn table and AI profile assets, update sector data, keep authored objects within budget, and add a playtest proving the camp spawns and remains performant.",
+      "category": "enemy_camp",
+      "project": "examples/open_world_studio",
+      "max_repair_attempts": 3,
+      "required_commands": [
+        "aa index",
+        "aa validate",
+        "aa check",
+        "aa scene inspect",
+        "aa scene patch",
+        "aa world inspect",
+        "aa world cook",
+        "aa playtest",
+        "aa profile summarize"
+      ],
+      "expected_files": [
+        "examples/open_world_studio/assets/worlds/open_world_studio.ron",
+        "examples/open_world_studio/assets/sectors/sector_0_0.ron",
+        "examples/open_world_studio/assets/spawn_tables/enemy_camp_sector_0_0.ron",
+        "examples/open_world_studio/assets/ai/camp_guard.ron",
+        "examples/open_world_studio/assets/playtests/open_world_enemy_camp.ron",
+        "examples/open_world_studio/assets/pawns/camp_guard.ron",
+        "examples/open_world_studio/assets/pawns/player_explorer.ron",
+        "examples/open_world_studio/assets/prefabs/camp_fire.ron",
+        "examples/open_world_studio/assets/prefabs/camp_guard_spawn.ron",
+        "examples/open_world_studio/assets/abilities/basic_melee.ron",
+        "examples/open_world_studio/assets/effects/camp_guard_baseline.ron",
+        "examples/open_world_studio/assets/data/tags.ron",
+        "docs/specs/fixtures/open_world_studio/add_campfire.scene_patch.json"
+      ],
+      "forbidden_paths": [
+        "target",
+        ".git"
+      ],
+      "acceptance": [
+        { "CommandPasses": "aa index" },
+        { "CommandPasses": "aa validate" },
+        { "CommandPasses": "aa check" },
+        { "CommandPasses": "aa scene inspect" },
+        { "CommandPasses": "aa scene patch" },
+        { "CommandPasses": "aa world inspect" },
+        { "CommandPasses": "aa world cook" },
+        { "PlaytestPasses": "open_world_enemy_camp" },
+        { "CommandPasses": "aa profile summarize" },
+        { "FileChanged": "examples/open_world_studio/assets/spawn_tables/enemy_camp_sector_0_0.ron" },
+        { "FileChanged": "examples/open_world_studio/assets/ai/camp_guard.ron" },
+        { "NoWritesOutsideAllowlist": true },
+        { "ProfileBudgetWithin": { "metric": "sector_load_p95_ms", "max": 400 } },
+        { "ProfileBudgetWithin": { "metric": "sector_crossing_hitch_ms", "max": 6 } }
+      ]
+    }
+  ]
+}

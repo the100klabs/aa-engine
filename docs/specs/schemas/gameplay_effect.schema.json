@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/gameplay_effect.schema.json",
+  "title": "GameplayEffect",
+  "type": "object",
+  "required": ["schema_version", "id", "modifiers"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "id": { "type": "string" },
+    "duration": {
+      "oneOf": [
+        { "const": "Instant" },
+        {
+          "type": "object",
+          "required": ["Periodic"],
+          "properties": {
+            "Periodic": {
+              "type": "object",
+              "required": ["seconds", "count"],
+              "properties": {
+                "seconds": { "type": "number", "exclusiveMinimum": 0 },
+                "count": { "type": "integer", "minimum": 1 }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["Infinite"],
+          "properties": { "Infinite": { "type": "object" } }
+        }
+      ]
+    },
+    "modifiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["attribute", "op", "magnitude"],
+        "properties": {
+          "attribute": { "type": "string" },
+          "op": { "enum": ["Add", "Multiply", "Override"] },
+          "magnitude": { "type": "number" }
+        }
+      }
+    },
+    "granted_tags": { "type": "array", "items": { "type": "string" } },
+    "application_tags_required": { "type": "array", "items": { "type": "string" } },
+    "application_tags_blocked": { "type": "array", "items": { "type": "string" } },
+    "cues_on_apply": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

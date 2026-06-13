@@ -1,0 +1,12 @@
+GameplayAbility(
+    schema_version: 1,
+    id: "abilities/fireball",
+    display_name: "Fireball",
+    cooldown_tags: ["Ability.Cooldown.Fireball"],
+    activation_tags_required: [],
+    activation_tags_blocked: ["State.Stunned", "State.Dead"],
+    cost_effect: None,
+    montage: None,
+    cue_on_activate: Some("GameplayCue.Fire.Cast"),
+    impl: "fireball",
+)

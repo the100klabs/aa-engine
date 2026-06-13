@@ -1,0 +1,28 @@
+(
+    schema_version: 1,
+    id: "camp_guard",
+    display_name: "Camp Guard",
+    behavior: (
+        kind: "guard",
+        home_radius_m: 24.0,
+        engage_radius_m: 30.0,
+        disengage_radius_m: 45.0,
+    ),
+    perception: (
+        sight_radius_m: 38.0,
+        hearing_radius_m: 22.0,
+        field_of_view_degrees: 120.0,
+    ),
+    combat: (
+        preferred_range_m: 8.0,
+        abilities: ["assets/abilities/basic_melee.ron"],
+        effects_on_spawn: ["assets/effects/camp_guard_baseline.ron"],
+    ),
+    lod: (
+        full_radius_m: 64.0,
+        simplified_radius_m: 160.0,
+        dormant_radius_m: 320.0,
+        despawn_radius_m: 384.0,
+    ),
+    tags: ["AI.Guard", "Faction.Bandits", "Encounter.Camp"],
+)

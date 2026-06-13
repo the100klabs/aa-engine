@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/prefab.schema.json",
+  "title": "Prefab",
+  "type": "object",
+  "required": ["schema_version", "id", "children"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "id": { "type": "string" },
+    "children": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "components": { "type": "object" },
+          "children": { "type": "array" }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

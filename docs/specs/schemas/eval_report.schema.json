@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/eval_report.schema.json",
+  "title": "EvalReport",
+  "type": "object",
+  "required": ["ok", "suite", "pass_rate", "tasks", "duration_ms"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "suite": { "type": "string", "minLength": 1 },
+    "eval_asset": { "$ref": "#/$defs/project_path" },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "duration_ms": { "type": "integer", "minimum": 0 },
+    "pass_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "repair_attempts_total": { "type": "integer", "minimum": 0 },
+    "tasks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/task_report" },
+      "minItems": 1
+    },
+    "artifacts": { "$ref": "#/$defs/artifacts" }
+  },
+  "$defs": {
+    "project_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.\\.)(?!.*\\\\).+$"
+    },
+    "command_name": {
+      "type": "string",
+      "enum": [
+        "aa index",
+        "aa validate",
+        "aa check",
+        "aa ability graph",
+        "aa scene inspect",
+        "aa scene patch",
+        "aa world inspect",
+        "aa world cook",
+        "aa playtest",
+        "aa profile summarize"
+      ]
+    },
+    "command_run": {
+      "type": "object",
+      "required": ["command", "exit_code", "duration_ms"],
+      "properties": {
+        "command": { "$ref": "#/$defs/command_name" },
+        "args": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "exit_code": { "type": "integer", "minimum": 0 },
+        "duration_ms": { "type": "integer", "minimum": 0 },
+        "artifact": { "$ref": "#/$defs/project_path" }
+      },
+      "additionalProperties": false
+    },
+    "task_report": {
+      "type": "object",
+      "required": ["id", "passed", "repair_attempts", "commands", "acceptance", "artifacts"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "passed": { "type": "boolean" },
+        "repair_attempts": { "type": "integer", "minimum": 0 },
+        "commands": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/command_run" }
+        },
+        "acceptance": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/acceptance_check" }
+        },
+        "failure_reason": { "type": "string" },
+        "final_diff": { "$ref": "#/$defs/project_path" },
+        "artifacts": { "$ref": "#/$defs/artifacts" }
+      },
+      "additionalProperties": false
+    },
+    "acceptance_check": {
+      "type": "object",
+      "required": ["name", "passed"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "passed": { "type": "boolean" },
+        "message": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "artifacts": {
+      "type": "object",
+      "properties": {
+        "log": { "$ref": "#/$defs/project_path" },
+        "report": { "$ref": "#/$defs/project_path" },
+        "diff": { "$ref": "#/$defs/project_path" },
+        "trace": { "$ref": "#/$defs/project_path" },
+        "profile": { "$ref": "#/$defs/project_path" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

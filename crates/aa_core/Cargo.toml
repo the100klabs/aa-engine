@@ -1,0 +1,20 @@
+[package]
+name = "aa_core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "AA Engine core — config, schedules, and app roles"
+
+[dependencies]
+bevy = { workspace = true }
+serde = { workspace = true }
+toml = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+thiserror = { workspace = true }
+
+[features]
+default = []
+editor = []
+server = []
+dev = ["editor"]

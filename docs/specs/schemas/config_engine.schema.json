@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aa-engine.dev/schemas/config_engine.schema.json",
+  "title": "AaEngineConfig",
+  "type": "object",
+  "required": ["app", "render", "audio", "net"],
+  "properties": {
+    "app": {
+      "type": "object",
+      "required": ["window_title", "target_fps"],
+      "properties": {
+        "window_title": { "type": "string", "minLength": 1 },
+        "target_fps": { "type": "integer", "minimum": 1, "maximum": 1000 }
+      },
+      "additionalProperties": false
+    },
+    "render": {
+      "type": "object",
+      "required": ["resolution_scale", "msaa", "shadow_quality", "gi"],
+      "properties": {
+        "resolution_scale": { "type": "number", "exclusiveMinimum": 0, "maximum": 2 },
+        "msaa": { "type": "integer", "enum": [1, 2, 4, 8] },
+        "shadow_quality": { "type": "string", "enum": ["low", "medium", "high", "epic"] },
+        "gi": { "type": "string", "enum": ["off", "baked", "probes", "probes_plus"] }
+      },
+      "additionalProperties": false
+    },
+    "audio": {
+      "type": "object",
+      "required": ["master_volume"],
+      "properties": {
+        "master_volume": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "net": {
+      "type": "object",
+      "required": ["default_port", "max_players"],
+      "properties": {
+        "default_port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "max_players": { "type": "integer", "minimum": 1, "maximum": 256 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
