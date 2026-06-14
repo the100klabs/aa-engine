@@ -1,4 +1,5 @@
 use aa_core::AaSchedule;
+use bevy::input::InputSystems;
 use bevy::prelude::*;
 
 use crate::assets::{
@@ -18,6 +19,11 @@ impl Plugin for AaInputPlugin {
             .init_resource::<ActiveInputContexts>()
             .init_resource::<InputActionRegistry>()
             .add_message::<crate::actions::InputActionEvent>()
-            .add_systems(PreUpdate, gather_input.in_set(AaSchedule::Input));
+            .add_systems(
+                PreUpdate,
+                gather_input
+                    .in_set(AaSchedule::Input)
+                    .after(InputSystems),
+            );
     }
 }

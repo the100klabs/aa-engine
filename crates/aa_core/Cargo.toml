@@ -14,6 +14,13 @@ tracing-subscriber = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
+aa_ability = { path = "../aa_ability" }
+aa_assets = { path = "../aa_assets" }
+aa_experience = { path = "../aa_experience" }
+aa_gameplay = { path = "../aa_gameplay" }
+aa_input = { path = "../aa_input" }
+aa_scene = { path = "../aa_scene" }
+aa_tags = { path = "../aa_tags" }
 tempfile = "3"
 
 [features]

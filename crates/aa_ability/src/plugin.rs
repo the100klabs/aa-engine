@@ -33,7 +33,9 @@ impl Plugin for AaAbilityPlugin {
             .add_systems(
                 FixedUpdate,
                 (
-                    try_activate_abilities.in_set(AaSchedule::AbilityFixed),
+                    (try_activate_abilities, execute_ability_impls)
+                        .chain()
+                        .in_set(AaSchedule::AbilityFixed),
                     (
                         apply_pending_effects,
                         tick_active_effects,
@@ -42,10 +44,6 @@ impl Plugin for AaAbilityPlugin {
                         .chain()
                         .in_set(AaSchedule::Effects),
                 ),
-            )
-            .add_systems(
-                PostUpdate,
-                execute_ability_impls.in_set(AaSchedule::AbilityFixed),
             );
     }
 }

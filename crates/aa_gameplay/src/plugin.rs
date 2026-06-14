@@ -1,3 +1,4 @@
+use aa_core::AaSchedule;
 use bevy::prelude::*;
 
 use crate::components::GameMode;
@@ -10,19 +11,19 @@ pub struct AaGameplayPlugin;
 
 impl Plugin for AaGameplayPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<GameMode>()
-            .add_systems(
-                Update,
-                (
-                    init_local_player,
-                    finish_player_init,
-                    spawn_training_dummy,
-                    finish_dummy_init,
-                ),
+        app.init_resource::<GameMode>().add_systems(
+            Update,
+            (
+                init_local_player,
+                finish_player_init,
+                spawn_training_dummy,
+                finish_dummy_init,
+                detect_death,
+                tick_respawn,
+                tick_dummy_combat,
             )
-            .add_systems(
-                Update,
-                (detect_death, tick_respawn, tick_dummy_combat).chain(),
-            );
+                .chain()
+                .after(AaSchedule::InitState),
+        );
     }
 }

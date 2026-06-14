@@ -1,4 +1,4 @@
-use aa_assets::TagDictionaryResource;
+use aa_assets::{load_tag_dictionary, TagDictionaryResource};
 use bevy::prelude::*;
 
 use crate::TagRegistry;
@@ -8,7 +8,10 @@ pub struct AaTagsPlugin;
 impl Plugin for AaTagsPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<TagRegistry>()
-            .add_systems(Startup, build_tag_registry);
+            .add_systems(
+                Startup,
+                build_tag_registry.after(load_tag_dictionary),
+            );
     }
 }
 
