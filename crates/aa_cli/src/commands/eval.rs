@@ -301,6 +301,8 @@ fn run_aa(repo: &Path, args: &[&str]) -> i32 {
         .current_dir(repo)
         .args(["run", "-p", "aa_cli", "--quiet", "--"])
         .args(args)
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
         .status();
     match status {
         Ok(s) => s.code().unwrap_or(1),

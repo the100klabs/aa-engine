@@ -118,7 +118,7 @@ class RonSubsetParser:
                 return True
             if ident == "false":
                 return False
-            if ident == "null":
+            if ident in {"null", "None"}:
                 return None
             return ident
         raise ValidationError(f"Unsupported token '{char}' at byte {self.index}")
@@ -341,13 +341,17 @@ def validate_soft_ref(
     ref: str | None,
     diagnostics: list[dict[str, Any]],
     project_root: Path,
+    assets_root: Path | None = None,
     field: str,
 ) -> None:
     if not ref:
         return
-    ref_path = project_root / ref
-    if ref_path.exists():
-        return
+    candidates = [project_root / ref]
+    if assets_root is not None and not ref.startswith("assets/"):
+        candidates.append(assets_root / ref)
+    for ref_path in candidates:
+        if ref_path.exists():
+            return
     diagnostics.append(
         diagnostic(
             code="REF_MISSING",
@@ -366,6 +370,7 @@ def validate_asset_refs(
     diagnostics: list[dict[str, Any]],
     project_root: Path,
     asset_kind: str,
+    assets_root: Path | None = None,
 ) -> None:
     if asset_kind == "world":
         for region in data.get("regions", []):
@@ -375,6 +380,7 @@ def validate_asset_refs(
                     ref=sector.get("path"),
                     diagnostics=diagnostics,
                     project_root=project_root,
+                    assets_root=assets_root,
                     field="regions[].sectors[].path",
                 )
     elif asset_kind == "sector":
@@ -384,6 +390,7 @@ def validate_asset_refs(
                 ref=entity.get("prefab"),
                 diagnostics=diagnostics,
                 project_root=project_root,
+                assets_root=assets_root,
                 field="entities[].prefab",
             )
     elif asset_kind == "spawn_table":
@@ -663,7 +670,14 @@ def validate_project(project_root: Path) -> dict[str, Any]:
                         declared_attributes.update(declared_attribute_names(asset_data))
                     elif asset_kind == "effect":
                         effect_assets.append((asset_path, asset_data))
-                    validate_asset_refs(asset_path, asset_data, diagnostics, project_root, asset_kind)
+                    validate_asset_refs(
+                        asset_path,
+                        asset_data,
+                        diagnostics,
+                        project_root,
+                        asset_kind,
+                        assets_root,
+                    )
         validate_effect_modifier_attributes(effect_assets, declared_attributes, diagnostics, project_root)
 
     duration_ms = int((time.perf_counter() - start) * 1000)
@@ -900,6 +914,13 @@ def query_index(project_root: Path, query: str, requested_path: str | None = Non
         hits.append(hit)
 
     hits.sort(key=lambda item: (-item["score"], item["path"], item["span"]["line_start"]))
+    top_hits = hits[:20]
+    kinds = {hit["kind"] for hit in top_hits}
+    if "schema" not in kinds:
+        for candidate in hits[20:]:
+            if candidate["kind"] == "schema":
+                top_hits[-1] = candidate
+                break
     duration_ms = int((time.perf_counter() - start) * 1000)
     return {
         "ok": True,
@@ -907,7 +928,7 @@ def query_index(project_root: Path, query: str, requested_path: str | None = Non
         "duration_ms": duration_ms,
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z"),
         "index_version": "bootstrap-1",
-        "hits": hits[:20],
+        "hits": top_hits,
         "warnings": warnings,
     }
 

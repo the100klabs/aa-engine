@@ -55,7 +55,6 @@ pub fn run() {
         Update,
         (
             script_streaming_movement,
-            playtest_spawn_camp_fallback,
             playtest_step.after(aa_world_stream::tick_sector_streaming),
         )
             .chain(),
@@ -174,74 +173,10 @@ fn script_streaming_movement(
     if registry
         .sectors
         .get("sector_0_0")
-        .is_some_and(|s| {
-            matches!(
-                s.lifecycle,
-                SectorLifecycle::Loaded | SectorLifecycle::Active | SectorLifecycle::Activating
-            )
-        })
+        .is_some_and(|s| s.lifecycle == SectorLifecycle::Active)
     {
         state.sector_ready = true;
     }
-}
-
-/// Spawns camp guards from the sector spawn table when streaming loaded sector 0/0.
-fn playtest_spawn_camp_fallback(
-    config: Res<PlaytestConfig>,
-    mut commands: Commands,
-    registry: Option<Res<SectorRegistry>>,
-    names: Query<&Name>,
-    guards: Query<&SpawnedPawn>,
-) {
-    if config.scenario != "open_world_enemy_camp" {
-        return;
-    }
-    if names.iter().any(|n| n.as_str() == "camp_guard_patrol")
-        || guards.iter().any(|g| g.stable_name == "camp_guard_patrol")
-    {
-        return;
-    }
-    let Some(registry) = registry else {
-        return;
-    };
-    let Some(state) = registry.sectors.get("sector_0_0") else {
-        return;
-    };
-    if !matches!(
-        state.lifecycle,
-        SectorLifecycle::Loaded | SectorLifecycle::Active | SectorLifecycle::Activating
-    ) {
-        return;
-    }
-    let project_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    if let Ok(table) = aa_world_stream::load_spawn_table_from_disk(
-        &project_root,
-        "assets/spawn_tables/enemy_camp_sector_0_0.ron",
-    ) {
-        for entry in &table.entries {
-            if let Some(pos) = entry.fixed_positions.first() {
-                commands.spawn((
-                    Name::new(entry.id.clone()),
-                    SpawnedPawn {
-                        sector_id: "sector_0_0".into(),
-                        entry_id: entry.id.clone(),
-                        stable_name: entry.id.clone(),
-                    },
-                    Transform::from_translation(Vec3::from_array(*pos)),
-                ));
-                return;
-            }
-        }
-    }
-    commands.spawn((
-        Name::new("camp_guard_patrol"),
-        SpawnedPawn {
-            sector_id: "sector_0_0".into(),
-            entry_id: "camp_guard_patrol".into(),
-            stable_name: "camp_guard_patrol".into(),
-        },
-        Transform::from_xyz(18.0, 0.0, 12.0),
-    ));
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -278,12 +213,7 @@ fn playtest_step(
     let active_sector_0_0 = registry
         .as_ref()
         .and_then(|registry| registry.sectors.get("sector_0_0"))
-        .is_some_and(|s| {
-            matches!(
-                s.lifecycle,
-                SectorLifecycle::Loaded | SectorLifecycle::Active | SectorLifecycle::Activating
-            )
-        });
+        .is_some_and(|s| s.lifecycle == SectorLifecycle::Active);
 
     let camp_guard_exists = names.iter().any(|name| name.as_str() == "camp_guard_patrol")
         || guards.iter().any(|g| g.stable_name == "camp_guard_patrol");

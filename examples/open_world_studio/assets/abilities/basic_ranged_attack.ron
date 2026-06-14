@@ -1,11 +1,12 @@
-(
+GameplayAbility(
     schema_version: 1,
-    id: "basic_ranged_attack",
+    id: "abilities/basic_ranged_attack",
     display_name: "Basic Ranged Attack",
-    description: "Starter elemental ranged ability for open world studio playtests.",
+    cooldown_tags: ["Ability.Cooldown.BasicRanged"],
+    activation_tags_required: [],
+    activation_tags_blocked: ["State.Stunned", "State.Dead"],
+    cost_effect: None,
+    montage: None,
+    cue_on_activate: None,
     impl: "basic_ranged_attack",
-    tags: ["Ability.Elemental", "Ability.Ranged"],
-    costs: [],
-    cooldown_secs: 1.5,
-    effects: ["assets/effects/camp_guard_baseline.ron"],
 )

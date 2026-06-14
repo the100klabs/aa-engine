@@ -32,9 +32,11 @@ impl StreamingProfileTrace {
         });
     }
 
-    pub fn record_frame(&mut self, cpu_ms: f32) {
+    /// Records per-frame CPU time. Hitch budget is updated only when `record_hitch` is true
+    /// (sector activation/deactivation frames), so startup GPU init does not inflate the metric.
+    pub fn record_frame(&mut self, cpu_ms: f32, record_hitch: bool) {
         self.frame_cpu_ms.push(cpu_ms);
-        if cpu_ms > self.crossing_hitch_ms {
+        if record_hitch && cpu_ms > self.crossing_hitch_ms {
             self.crossing_hitch_ms = cpu_ms;
         }
     }

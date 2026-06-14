@@ -161,6 +161,22 @@
             }
           },
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["MoveStreamingSource"],
+          "properties": {
+            "MoveStreamingSource": {
+              "type": "object",
+              "required": ["speed_mps", "direction"],
+              "properties": {
+                "speed_mps": { "type": "number", "exclusiveMinimum": 0 },
+                "direction": { "$ref": "#/$defs/vec3" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
         }
       ]
     },
@@ -230,6 +246,14 @@
           "required": ["NoCrash"],
           "properties": {
             "NoCrash": { "type": "boolean", "const": true }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["SectorTraversed"],
+          "properties": {
+            "SectorTraversed": { "type": "integer", "minimum": 1 }
           },
           "additionalProperties": false
         }

@@ -71,9 +71,11 @@ pub fn queue_sectors_for_sources(
 
     for (sector_id, state) in &mut registry.sectors {
         if desired.contains(sector_id) {
+            // Keep Loaded/Loading/Activating/Active sectors on the activation path; only
+            // (re-)queue sectors that still need a load pass.
             if matches!(
                 state.lifecycle,
-                SectorLifecycle::Discovered | SectorLifecycle::Loaded | SectorLifecycle::Deactivating
+                SectorLifecycle::Discovered | SectorLifecycle::Deactivating
             ) {
                 state.lifecycle = SectorLifecycle::Queued;
             }
@@ -126,16 +128,25 @@ pub fn tick_sector_streaming(
 
         match state.lifecycle {
             SectorLifecycle::Queued => {
-                if let Some(root) = project_root.as_ref()
+                if let Some(root) = project_root.as_deref()
                     && let Ok(sector) = crate::registry::load_sector_descriptor_from_disk(
                         &root.path,
                         &state.ref_descriptor.path,
                     )
                 {
-                    state.cached_sector = Some(sector);
+                    state.cached_sector = Some(sector.clone());
                     state.load_started = Some(std::time::Instant::now());
                     state.load_ms = Some(0.0);
-                    state.lifecycle = SectorLifecycle::Loaded;
+                    try_activate_sector(
+                        &mut commands,
+                        &sector_id,
+                        &sector,
+                        state,
+                        project_root.as_deref(),
+                        &mut activations,
+                        max_activations,
+                        trace.as_mut().map(|t| t.as_mut()),
+                    );
                     continue;
                 }
                 let handle: Handle<crate::assets::SectorDescriptorAsset> =
@@ -156,52 +167,61 @@ pub fn tick_sector_streaming(
                     if let (Some(load_ms), Some(trace)) = (state.load_ms, trace.as_mut()) {
                         trace.record_load(&sector_id, load_ms, time.elapsed_secs());
                     }
-                    state.lifecycle = SectorLifecycle::Loaded;
-                } else if let Some(root) = project_root.as_ref()
+                    try_activate_sector(
+                        &mut commands,
+                        &sector_id,
+                        sector,
+                        state,
+                        project_root.as_deref(),
+                        &mut activations,
+                        max_activations,
+                        trace.as_mut().map(|t| t.as_mut()),
+                    );
+                } else if let Some(root) = project_root.as_deref()
                     && let Ok(sector) = crate::registry::load_sector_descriptor_from_disk(
                         &root.path,
                         &state.ref_descriptor.path,
                     )
                 {
-                    state.cached_sector = Some(sector);
+                    state.cached_sector = Some(sector.clone());
                     state.load_ms = state
                         .load_started
                         .map(|started| started.elapsed().as_secs_f32() * 1000.0);
                     if let (Some(load_ms), Some(trace)) = (state.load_ms, trace.as_mut()) {
                         trace.record_load(&sector_id, load_ms, time.elapsed_secs());
                     }
-                    state.lifecycle = SectorLifecycle::Loaded;
+                    try_activate_sector(
+                        &mut commands,
+                        &sector_id,
+                        &sector,
+                        state,
+                        project_root.as_deref(),
+                        &mut activations,
+                        max_activations,
+                        trace.as_mut().map(|t| t.as_mut()),
+                    );
                 }
             }
             SectorLifecycle::Loaded | SectorLifecycle::Activating => {
                 if activations < max_activations {
-                    state.lifecycle = SectorLifecycle::Activating;
                     if let Some(sector) = state.cached_sector.clone().or_else(|| {
                         state
                             .asset_handle
                             .as_ref()
                             .and_then(|handle| sector_assets.get(handle).cloned())
                     }) {
-                        spawn_sector_entities(
+                        try_activate_sector(
                             &mut commands,
                             &sector_id,
                             &sector,
-                            &mut state.spawned_entities,
+                            state,
+                            project_root.as_deref(),
+                            &mut activations,
+                            max_activations,
+                            trace.as_mut().map(|t| t.as_mut()),
                         );
-                        if let Some(root) = project_root.as_ref() {
-                            activate_sector_spawns(
-                                &mut commands,
-                                &root.path,
-                                &sector_id,
-                                &sector.entities,
-                                state,
-                            );
-                        }
-                        state.lifecycle = SectorLifecycle::Active;
-                        activations += 1;
-                        if let Some(trace) = trace.as_mut() {
-                            trace.activation_count += 1;
-                        }
+                    } else if state.lifecycle == SectorLifecycle::Loaded {
+                        state.lifecycle = SectorLifecycle::Activating;
                     }
                 }
             }
@@ -227,7 +247,47 @@ pub fn tick_sector_streaming(
             .count() as u32;
         trace.max_active_sectors = trace.max_active_sectors.max(active);
         trace.elapsed_secs = time.elapsed_secs();
-        trace.record_frame(frame_start.elapsed().as_secs_f32() * 1000.0);
+        let had_sector_crossing = activations > 0 || deactivations > 0;
+        // Ignore startup/render-init frames; only count hitches on sector crossing frames.
+        if time.elapsed_secs() >= 2.0 {
+            trace.record_frame(
+                frame_start.elapsed().as_secs_f32() * 1000.0,
+                had_sector_crossing,
+            );
+        }
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn try_activate_sector(
+    commands: &mut Commands,
+    sector_id: &str,
+    sector: &crate::assets::SectorDescriptorAsset,
+    state: &mut crate::registry::SectorRuntimeState,
+    project_root: Option<&StreamingProjectRoot>,
+    activations: &mut u32,
+    max_activations: u32,
+    mut trace: Option<&mut StreamingProfileTrace>,
+) {
+    if *activations >= max_activations {
+        state.lifecycle = SectorLifecycle::Loaded;
+        return;
+    }
+    state.lifecycle = SectorLifecycle::Activating;
+    spawn_sector_entities(commands, sector_id, sector, &mut state.spawned_entities);
+    if let Some(root) = project_root {
+        activate_sector_spawns(
+            commands,
+            &root.path,
+            sector_id,
+            &sector.entities,
+            state,
+        );
+    }
+    state.lifecycle = SectorLifecycle::Active;
+    *activations += 1;
+    if let Some(trace) = trace.as_mut() {
+        trace.activation_count += 1;
     }
 }
 

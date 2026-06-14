@@ -227,10 +227,11 @@ fn load_scene(scene_arg: &str) -> (PathBuf, String, String, Vec<SceneEntity>, Ve
             let entity_id = format!("{root_id}/entity_{index}");
             SceneEntity {
                 id: entity_id,
-                name: item.prefab.as_ref().and_then(|p| {
-                    Path::new(p).file_stem().and_then(|s| s.to_str()).map(|s| s.to_string())
-                }),
-                prefab: item.prefab.clone(),
+                name: Path::new(&item.prefab)
+                    .file_stem()
+                    .and_then(|s| s.to_str())
+                    .map(|s| s.to_string()),
+                prefab: Some(item.prefab.clone()),
                 layers: Some(layers.clone()),
             }
         })
@@ -250,7 +251,19 @@ struct SectorRon {
 
 #[derive(Debug, Deserialize)]
 struct SectorEntityRon {
-    prefab: Option<String>,
+    prefab: String,
+    #[serde(default)]
+    transform: SectorTransformRon,
+}
+
+#[derive(Debug, Deserialize, Default)]
+struct SectorTransformRon {
+    #[serde(default)]
+    translation: (f32, f32, f32),
+    #[serde(default)]
+    rotation_y_degrees: f32,
+    #[serde(default)]
+    scale: (f32, f32, f32),
 }
 
 fn emit(result: Value, json: bool, ok: bool) -> ExitCode {

@@ -19,6 +19,7 @@ pub struct ProjectManifest {
     pub schema_version: u32,
     pub name: String,
     #[serde(default)]
+    #[allow(dead_code)]
     pub version: String,
     pub engine: EngineSection,
 }

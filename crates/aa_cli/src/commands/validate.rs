@@ -9,25 +9,38 @@ use crate::exit_codes::ExitCode;
 use crate::project::{self, ProjectError, REQUIRED_CONFIG_FILES};
 
 #[derive(Debug, Clone, Serialize)]
-pub struct ValidationError {
+pub struct ValidationDiagnostic {
     pub code: String,
+    pub severity: String,
     pub message: String,
     pub path: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub line: Option<u32>,
+    pub span: Option<DiagnosticSpan>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct DiagnosticSpan {
+    pub line: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub column: Option<u32>,
+}
+
+#[derive(Debug, Clone)]
+struct ValidationError {
+    pub code: String,
+    pub message: String,
+    pub path: String,
+    pub line: Option<u32>,
     pub column: Option<u32>,
 }
 
 #[derive(Serialize)]
 struct ValidateReport {
     ok: bool,
-    project_name: Option<String>,
-    project_version: Option<String>,
     error_count: usize,
     warning_count: usize,
-    errors: Vec<ValidationError>,
     duration_ms: u64,
+    diagnostics: Vec<ValidationDiagnostic>,
 }
 
 /// Validate project assets and configuration.
@@ -43,7 +56,7 @@ pub fn run(path: &Path, json: bool, sarif: bool) -> ExitCode {
                 line: None,
                 column: None,
             };
-            return finish(vec![err], 0, started, json, sarif, None);
+            return finish(vec![err], 0, started, json, sarif);
         }
         Err(e) => {
             eprintln!("error: {e}");
@@ -60,7 +73,7 @@ pub fn run(path: &Path, json: bool, sarif: bool) -> ExitCode {
         Ok(m) => m,
         Err(e) => {
             errors.push(validation_error("MANIFEST_PARSE", e.to_string(), project::manifest_path(&project_root)));
-            return finish(errors, warnings, started, json, sarif, None);
+            return finish(errors, warnings, started, json, sarif);
         }
     };
 
@@ -101,7 +114,7 @@ pub fn run(path: &Path, json: bool, sarif: bool) -> ExitCode {
             format!("assets root not found: {}", manifest.engine.assets_root),
             assets_root,
         ));
-        return finish(errors, warnings, started, json, sarif, None);
+        return finish(errors, warnings, started, json, sarif);
     }
 
     let mut prefab_ids: HashMap<String, PathBuf> = HashMap::new();
@@ -173,14 +186,7 @@ pub fn run(path: &Path, json: bool, sarif: bool) -> ExitCode {
         }
     }
 
-    finish(
-        errors,
-        warnings,
-        started,
-        json,
-        sarif,
-        Some((manifest.name.clone(), manifest.version.clone())),
-    )
+    finish(errors, warnings, started, json, sarif)
 }
 
 fn validate_prefab_refs(
@@ -199,20 +205,26 @@ fn validate_prefab_refs(
         };
 
         for (prefab_id, byte_offset) in extract_prefab_refs(&text) {
-            if !prefab_ids.contains_key(&prefab_id) {
-                let rel = file_path
-                    .strip_prefix(project_root)
-                    .unwrap_or(file_path)
-                    .to_string_lossy()
-                    .into_owned();
-                errors.push(ValidationError {
-                    code: "REF_MISSING".into(),
-                    message: format!("prefab ref '{prefab_id}' does not resolve"),
-                    path: rel,
-                    line: line_number_for_match(&text, byte_offset),
-                    column: None,
-                });
+            let normalized = normalize_prefab_ref(&prefab_id);
+            if prefab_ids.contains_key(&normalized) {
+                continue;
             }
+            let asset_ref = prefab_id.strip_prefix("assets/").unwrap_or(&prefab_id);
+            if assets_root.join(asset_ref).is_file() {
+                continue;
+            }
+            let rel = file_path
+                .strip_prefix(project_root)
+                .unwrap_or(file_path)
+                .to_string_lossy()
+                .into_owned();
+            errors.push(ValidationError {
+                code: "REF_MISSING".into(),
+                message: format!("prefab ref '{prefab_id}' does not resolve"),
+                path: rel,
+                line: line_number_for_match(&text, byte_offset),
+                column: None,
+            });
         }
     }
 }
@@ -226,7 +238,7 @@ fn detect_prefab_cycles(prefab_ids: &HashMap<String, PathBuf>, errors: &mut Vec<
         };
         let refs: Vec<String> = extract_prefab_refs(&text)
             .into_iter()
-            .map(|(r, _)| r)
+            .map(|(r, _)| normalize_prefab_ref(&r))
             .filter(|r| prefab_ids.contains_key(r))
             .collect();
         graph.insert(id.clone(), refs);
@@ -281,6 +293,17 @@ fn find_cycle(start: &str, graph: &HashMap<String, Vec<String>>) -> Option<Vec<S
         visited.insert(node);
     }
     None
+}
+
+fn normalize_prefab_ref(prefab_id: &str) -> String {
+    let mut id = prefab_id.trim();
+    if let Some(stripped) = id.strip_prefix("assets/") {
+        id = stripped;
+    }
+    if let Some(stripped) = id.strip_suffix(".ron") {
+        id = stripped;
+    }
+    id.to_string()
 }
 
 /// Scan RON text for `prefab: "some/id"` soft references.
@@ -343,21 +366,28 @@ fn finish(
     started: Instant,
     json: bool,
     sarif: bool,
-    project: Option<(String, String)>,
 ) -> ExitCode {
     let ok = errors.is_empty();
-    let (project_name, project_version) = project
-        .map(|(name, version)| (Some(name), Some(version)))
-        .unwrap_or((None, None));
+    let diagnostics: Vec<ValidationDiagnostic> = errors
+        .iter()
+        .map(|err| ValidationDiagnostic {
+            code: err.code.clone(),
+            severity: "error".into(),
+            message: err.message.clone(),
+            path: err.path.clone(),
+            span: err.line.map(|line| DiagnosticSpan {
+                line,
+                column: err.column,
+            }),
+        })
+        .collect();
 
     let report = ValidateReport {
         ok,
-        project_name,
-        project_version,
         error_count: errors.len(),
         warning_count,
-        errors: errors.clone(),
         duration_ms: started.elapsed().as_millis() as u64,
+        diagnostics,
     };
 
     if sarif {
@@ -372,8 +402,8 @@ fn finish(
             report.duration_ms
         );
     } else {
-        for err in &report.errors {
-            eprintln!("{}: {} — {}", err.code, err.path, err.message);
+        for diag in &report.diagnostics {
+            eprintln!("{}: {} — {}", diag.code, diag.path, diag.message);
         }
         eprintln!(
             "validation failed: {} error(s), {} warning(s) ({} ms)",
@@ -390,17 +420,17 @@ fn finish(
 
 fn validation_to_sarif(report: &ValidateReport) -> serde_json::Value {
     let results: Vec<serde_json::Value> = report
-        .errors
+        .diagnostics
         .iter()
-        .map(|err| {
+        .map(|diag| {
             serde_json::json!({
-                "ruleId": err.code,
-                "level": "error",
-                "message": { "text": err.message },
+                "ruleId": diag.code,
+                "level": diag.severity,
+                "message": { "text": diag.message },
                 "locations": [{
                     "physicalLocation": {
-                        "artifactLocation": { "uri": err.path },
-                        "region": err.line.map(|line| serde_json::json!({ "startLine": line }))
+                        "artifactLocation": { "uri": diag.path },
+                        "region": diag.span.as_ref().map(|span| serde_json::json!({ "startLine": span.line }))
                     }
                 }]
             })

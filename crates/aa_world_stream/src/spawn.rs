@@ -39,16 +39,16 @@ pub struct SpawnTableEntry {
     pub id: String,
     pub pawn: String,
     #[serde(default)]
-    pub ai_profile: Option<String>,
+    pub ai_profile: String,
     #[serde(default)]
-    pub prefab: Option<String>,
+    pub prefab: String,
     #[serde(default)]
     pub weight: f32,
     #[serde(default = "default_count_min")]
     pub count_min: u32,
     #[serde(default = "default_count_max")]
     pub count_max: u32,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_fixed_positions")]
     pub fixed_positions: Vec<[f32; 3]>,
 }
 
@@ -58,6 +58,24 @@ fn default_count_min() -> u32 {
 
 fn default_count_max() -> u32 {
     1
+}
+
+fn deserialize_fixed_positions<'de, D>(deserializer: D) -> Result<Vec<[f32; 3]>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let raw = Vec::<Vec<f32>>::deserialize(deserializer)?;
+    raw.into_iter()
+        .map(|coords| {
+            if coords.len() != 3 {
+                return Err(serde::de::Error::custom(format!(
+                    "fixed_positions entry expected 3 floats, got {}",
+                    coords.len()
+                )));
+            }
+            Ok([coords[0], coords[1], coords[2]])
+        })
+        .collect()
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -183,9 +201,9 @@ pub fn activate_sector_spawns(
                     Transform::from_translation(world_pos).with_rotation(base_rotation),
                     Name::new(stable_name),
                 ));
-                if let Some(profile) = &entry.ai_profile {
+                if !entry.ai_profile.is_empty() {
                     cmd.insert(CampGuardAi {
-                        profile_path: profile.clone(),
+                        profile_path: entry.ai_profile.clone(),
                     });
                 }
                 let id = cmd.id();
@@ -200,5 +218,24 @@ pub fn activate_sector_spawns(
 pub fn deactivate_sector_cleanup(commands: &mut Commands, state: &mut SectorRuntimeState) {
     for entity in state.spawned_entities.drain(..) {
         commands.entity(entity).despawn();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    #[test]
+    fn load_open_world_enemy_camp_spawn_table() {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../examples/open_world_studio");
+        let table = load_spawn_table_from_disk(
+            &root,
+            "assets/spawn_tables/enemy_camp_sector_0_0.ron",
+        )
+        .expect("spawn table should load from open_world_studio assets");
+        assert_eq!(table.entries.len(), 1);
+        assert_eq!(table.entries[0].id, "camp_guard_patrol");
+        assert_eq!(table.entries[0].fixed_positions.len(), 3);
     }
 }
