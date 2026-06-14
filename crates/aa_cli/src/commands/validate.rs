@@ -3,10 +3,27 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use serde::Serialize;
+use serde_json::Value;
 use walkdir::WalkDir;
 
 use crate::exit_codes::ExitCode;
 use crate::project::{self, ProjectError, REQUIRED_CONFIG_FILES};
+use crate::ron_subset::{load_ron_subset, RonParseError};
+use crate::schema_subset::{load_json, validate_schema, SchemaValidationError};
+
+#[derive(Debug, Clone, Copy)]
+enum AssetKind {
+    World,
+    Sector,
+    SpawnTable,
+    Ability,
+}
+
+struct AssetSchemaRule {
+    glob_dir: &'static str,
+    schema_name: &'static str,
+    kind: AssetKind,
+}
 
 #[derive(Debug, Clone, Serialize)]
 pub struct ValidationDiagnostic {
@@ -163,6 +180,12 @@ pub fn run(path: &Path, json: bool, sarif: bool) -> ExitCode {
 
     validate_prefab_refs(&project_root, &assets_root, &prefab_ids, &mut errors);
     detect_prefab_cycles(&prefab_ids, &mut errors);
+    validate_schema_assets(
+        &workspace_root(&project_root),
+        &project_root,
+        &assets_root,
+        &mut errors,
+    );
 
     if let Some(scene) = manifest.engine.startup_scene.as_deref() {
         let scene_path = assets_root.join(format!("{scene}.ron"));
@@ -187,6 +210,243 @@ pub fn run(path: &Path, json: bool, sarif: bool) -> ExitCode {
     }
 
     finish(errors, warnings, started, json, sarif)
+}
+
+fn validate_schema_assets(
+    workspace_root: &Path,
+    project_root: &Path,
+    assets_root: &Path,
+    errors: &mut Vec<ValidationError>,
+) {
+    let schemas_dir = workspace_root.join("docs/specs/schemas");
+    if !schemas_dir.is_dir() {
+        errors.push(validation_error(
+            "SCHEMA_ROOT_MISSING",
+            format!(
+                "schema directory not found: {}",
+                rel_to_project(&schemas_dir, project_root)
+            ),
+            project_root.join("aa.project.toml"),
+        ));
+        return;
+    }
+
+    let rules = [
+        AssetSchemaRule {
+            glob_dir: "worlds",
+            schema_name: "world.schema.json",
+            kind: AssetKind::World,
+        },
+        AssetSchemaRule {
+            glob_dir: "sectors",
+            schema_name: "sector.schema.json",
+            kind: AssetKind::Sector,
+        },
+        AssetSchemaRule {
+            glob_dir: "spawn_tables",
+            schema_name: "spawn_table.schema.json",
+            kind: AssetKind::SpawnTable,
+        },
+        AssetSchemaRule {
+            glob_dir: "abilities",
+            schema_name: "gameplay_ability.schema.json",
+            kind: AssetKind::Ability,
+        },
+    ];
+
+    for rule in rules {
+        let asset_dir = assets_root.join(rule.glob_dir);
+        if !asset_dir.is_dir() {
+            continue;
+        }
+        let schema_path = schemas_dir.join(rule.schema_name);
+        let schema = match load_json(&schema_path) {
+            Ok(schema) => schema,
+            Err(err) => {
+                errors.push(validation_error(
+                    "SCHEMA_LOAD",
+                    err.to_string(),
+                    &schema_path,
+                ));
+                continue;
+            }
+        };
+
+        let mut asset_paths: Vec<PathBuf> = WalkDir::new(&asset_dir)
+            .min_depth(1)
+            .max_depth(1)
+            .into_iter()
+            .filter_map(Result::ok)
+            .map(|entry| entry.into_path())
+            .filter(|path| path.extension().and_then(|ext| ext.to_str()) == Some("ron"))
+            .collect();
+        asset_paths.sort();
+
+        for asset_path in asset_paths {
+            let rel_path = rel_to_project(&asset_path, project_root);
+
+            let data = match load_ron_subset(&asset_path) {
+                Ok(data) => data,
+                Err(RonParseError { message }) => {
+                    errors.push(validation_error("RON_PARSE", message, &rel_path));
+                    continue;
+                }
+            };
+
+            if let Err(SchemaValidationError { message }) =
+                validate_schema(&schema, &data, &schema, "$")
+            {
+                errors.push(ValidationError {
+                    code: "SCHEMA_INVALID".into(),
+                    message,
+                    path: rel_path.clone(),
+                    line: None,
+                    column: None,
+                });
+                continue;
+            }
+
+            if let Value::Object(map) = data {
+                validate_asset_refs(
+                    &rel_path,
+                    &map,
+                    project_root,
+                    assets_root,
+                    rule.kind,
+                    errors,
+                );
+            }
+        }
+    }
+}
+
+fn validate_asset_refs(
+    source_path: &str,
+    data: &serde_json::Map<String, Value>,
+    project_root: &Path,
+    assets_root: &Path,
+    asset_kind: AssetKind,
+    errors: &mut Vec<ValidationError>,
+) {
+    match asset_kind {
+        AssetKind::World => {
+            if let Some(regions) = data.get("regions").and_then(Value::as_array) {
+                for region in regions {
+                    if let Some(sectors) = region.as_object().and_then(|r| r.get("sectors")).and_then(Value::as_array) {
+                        for sector in sectors {
+                            validate_soft_ref(
+                                source_path,
+                                sector.as_object().and_then(|s| s.get("path")).and_then(Value::as_str),
+                                project_root,
+                                Some(assets_root),
+                                "regions[].sectors[].path",
+                                errors,
+                            );
+                        }
+                    }
+                }
+            }
+        }
+        AssetKind::Sector => {
+            if let Some(entities) = data.get("entities").and_then(Value::as_array) {
+                for entity in entities {
+                    validate_soft_ref(
+                        source_path,
+                        entity
+                            .as_object()
+                            .and_then(|e| e.get("prefab"))
+                            .and_then(Value::as_str),
+                        project_root,
+                        Some(assets_root),
+                        "entities[].prefab",
+                        errors,
+                    );
+                }
+            }
+        }
+        AssetKind::SpawnTable => {
+            if let Some(entries) = data.get("entries").and_then(Value::as_array) {
+                for entry in entries {
+                    let Some(entry_map) = entry.as_object() else {
+                        continue;
+                    };
+                    for field in ["pawn", "ai_profile", "prefab"] {
+                        validate_soft_ref(
+                            source_path,
+                            entry_map.get(field).and_then(Value::as_str),
+                            project_root,
+                            None,
+                            &format!("entries[].{field}"),
+                            errors,
+                        );
+                    }
+                }
+            }
+        }
+        AssetKind::Ability => {
+            validate_soft_ref(
+                source_path,
+                data.get("cost_effect").and_then(Value::as_str),
+                project_root,
+                None,
+                "cost_effect",
+                errors,
+            );
+        }
+    }
+}
+
+fn validate_soft_ref(
+    source_path: &str,
+    reference: Option<&str>,
+    project_root: &Path,
+    assets_root: Option<&Path>,
+    field: &str,
+    errors: &mut Vec<ValidationError>,
+) {
+    let Some(reference) = reference else {
+        return;
+    };
+    let mut candidates = vec![project_root.join(reference)];
+    if let Some(assets_root) = assets_root
+        && !reference.starts_with("assets/")
+    {
+        candidates.push(assets_root.join(reference));
+    }
+    if candidates.iter().any(|path| path.exists()) {
+        return;
+    }
+    errors.push(ValidationError {
+        code: "REF_MISSING".into(),
+        message: format!("Missing soft ref in {field}: {reference}"),
+        path: source_path.to_string(),
+        line: None,
+        column: None,
+    });
+}
+
+fn workspace_root(project_root: &Path) -> PathBuf {
+    let mut dir = project_root.to_path_buf();
+    loop {
+        if dir.join("Cargo.toml").is_file()
+            && std::fs::read_to_string(dir.join("Cargo.toml"))
+                .map(|text| text.contains("[workspace]"))
+                .unwrap_or(false)
+        {
+            return dir;
+        }
+        if !dir.pop() {
+            break;
+        }
+    }
+    project_root.to_path_buf()
+}
+
+fn rel_to_project(path: &Path, project_root: &Path) -> String {
+    path.strip_prefix(project_root)
+        .unwrap_or(path)
+        .to_string_lossy()
+        .replace('\\', "/")
 }
 
 fn validate_prefab_refs(

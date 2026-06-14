@@ -1,6 +1,8 @@
 mod commands;
 mod exit_codes;
 mod project;
+mod ron_subset;
+mod schema_subset;
 
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
