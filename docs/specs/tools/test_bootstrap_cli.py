@@ -462,16 +462,23 @@ class BootstrapCliTests(unittest.TestCase):
             {
                 "demo_game_add_fire_ability",
                 "open_world_studio_enemy_camp",
+                "open_world_studio_elemental_ability",
             },
         )
         fire = next(suite for suite in payload["suites"] if suite["id"] == "demo_game_add_fire_ability")
         open_world = next(suite for suite in payload["suites"] if suite["id"] == "open_world_studio_enemy_camp")
+        elemental = next(
+            suite for suite in payload["suites"] if suite["id"] == "open_world_studio_elemental_ability"
+        )
         self.assertEqual(fire["tier"], "studio_alpha")
         self.assertEqual(fire["categories"], ["ability"])
         self.assertIn("aa ability graph", fire["required_commands"])
         self.assertEqual(open_world["tier"], "open_world_alpha")
         self.assertEqual(open_world["categories"], ["enemy_camp"])
         self.assertIn("aa world inspect", open_world["required_commands"])
+        self.assertEqual(elemental["tier"], "open_world_alpha")
+        self.assertEqual(elemental["categories"], ["ability"])
+        self.assertIn("aa playtest", elemental["required_commands"])
         assert_schema_valid(self, "eval_list_result.schema.json", payload)
 
     def test_validate_demo_game_contract_project(self) -> None:
@@ -565,6 +572,29 @@ class BootstrapCliTests(unittest.TestCase):
         self.assertTrue(acceptance["PlaytestPasses:fireball_hit"]["passed"])
         self.assertTrue(acceptance["FileChanged:examples/demo_game_contract/assets/abilities/fireball.ron"]["passed"])
         self.assertTrue(acceptance["FileChanged:examples/demo_game_contract/assets/effects/fireball_damage.ron"]["passed"])
+        assert_schema_valid(self, "eval_report.schema.json", payload)
+
+    def test_eval_open_world_elemental_ability_fixture_passes(self) -> None:
+        result = run_bootstrap("eval", "run", "open_world_studio_elemental_ability", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout)
+        payload = json.loads(result.stdout)
+
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["suite"], "open_world_studio_elemental_ability")
+        self.assertEqual(payload["pass_rate"], 1.0)
+        task = payload["tasks"][0]
+        self.assertTrue(task["passed"])
+        command_names = {item["command"] for item in task["commands"]}
+        self.assertTrue({"aa index", "aa validate", "aa playtest"}.issubset(command_names))
+        playtest = next(item for item in task["commands"] if item["command"] == "aa playtest")
+        self.assertIn("open_world_enemy_camp", playtest["args"])
+        acceptance = {item["name"]: item for item in task["acceptance"]}
+        self.assertTrue(acceptance["PlaytestPasses:open_world_enemy_camp"]["passed"])
+        self.assertTrue(
+            acceptance[
+                "ExpectedFile:examples/open_world_studio/assets/abilities/basic_ranged_attack.ron"
+            ]["passed"]
+        )
         assert_schema_valid(self, "eval_report.schema.json", payload)
 
     def test_world_profile_and_playtest_fixture_outputs_match_schemas(self) -> None:

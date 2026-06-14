@@ -156,6 +156,28 @@ pub fn run_eval(eval_id_or_path: &str, json: bool) -> ExitCode {
     }
 }
 
+fn eval_index_query(task: &EvalTask) -> &'static str {
+    if task.category == "enemy_camp" {
+        "enemy camp sector"
+    } else if task.category == "ability" && task.project.contains("open_world_studio") {
+        "elemental ranged ability basic_ranged_attack"
+    } else if task.category == "ability" {
+        "fire ability fireball demo_game"
+    } else {
+        "open world"
+    }
+}
+
+fn eval_playtest_target(task: &EvalTask) -> (&str, &'static str) {
+    if task.project.contains("open_world_studio") {
+        ("examples/open_world_studio", "open_world_enemy_camp")
+    } else if task.category == "ability" {
+        ("examples/demo_game", "fireball_hit")
+    } else {
+        (task.project.as_str(), "open_world_enemy_camp")
+    }
+}
+
 fn run_eval_command(
     command: &str,
     task: &EvalTask,
@@ -165,13 +187,7 @@ fn run_eval_command(
     let started = Instant::now();
     let (args, failure) = match command {
         "aa index" => {
-            let query = if task.category == "enemy_camp" {
-                "enemy camp sector"
-            } else if task.category == "ability" {
-                "fire ability fireball demo_game"
-            } else {
-                "open world"
-            };
+            let query = eval_index_query(task);
             let code = run_aa(repo, &["index", project_root.to_str().unwrap(), "--query", query, "--json"]);
             (
                 vec!["--query", query, "--json"],
@@ -221,16 +237,7 @@ fn run_eval_command(
             )
         }
         "aa playtest" => {
-            let scenario = if task.category == "ability" {
-                "fireball_hit"
-            } else {
-                "open_world_enemy_camp"
-            };
-            let project = if task.category == "ability" {
-                "examples/demo_game"
-            } else {
-                "examples/open_world_studio"
-            };
+            let (project, scenario) = eval_playtest_target(task);
             let code = run_aa(
                 repo,
                 &[

@@ -63,10 +63,18 @@ impl ConfigProvider {
     }
 
     pub fn apply_cli_override(&mut self, key: &str, value: &str) -> Result<(), ConfigError> {
-        let parsed: toml::Value = value.parse().map_err(|source| ConfigError::Parse {
-            key: key.to_owned(),
-            source: Box::new(source),
-        })?;
+        let parsed: toml::Value = if let Ok(integer) = value.parse::<i64>() {
+            toml::Value::Integer(integer)
+        } else if let Ok(float) = value.parse::<f64>() {
+            toml::Value::Float(float)
+        } else if let Ok(boolean) = value.parse::<bool>() {
+            toml::Value::Boolean(boolean)
+        } else {
+            value.parse().map_err(|source| ConfigError::Parse {
+                key: key.to_owned(),
+                source: Box::new(source),
+            })?
+        };
         set_at_dot_path(&mut self.cli_overrides, key, parsed);
         Ok(())
     }

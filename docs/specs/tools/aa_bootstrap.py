@@ -22,6 +22,7 @@ from schema_subset import ValidationError, load_json, validate_schema
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_OPEN_WORLD_EVAL = REPO_ROOT / "docs/specs/fixtures/open_world_studio/add_enemy_camp.eval.json"
+DEFAULT_ELEMENTAL_ABILITY_EVAL = REPO_ROOT / "docs/specs/fixtures/open_world_studio/add_elemental_ability.eval.json"
 OPEN_WORLD_FIXTURE_ROOT = REPO_ROOT / "docs/specs/fixtures/open_world_studio"
 DEFAULT_DEMO_GAME_EVAL = REPO_ROOT / "docs/specs/fixtures/demo_game/add_fire_ability.eval.json"
 DEMO_GAME_FIXTURE_ROOT = REPO_ROOT / "docs/specs/fixtures/demo_game"
@@ -1926,6 +1927,12 @@ def ability_graph(project_root: Path, ability_id_or_path: str) -> dict[str, Any]
 def resolve_eval_asset(eval_id_or_path: str) -> Path:
     if eval_id_or_path in {"open_world_studio_enemy_camp", "add_enemy_camp", "open_world_studio"}:
         return DEFAULT_OPEN_WORLD_EVAL
+    if eval_id_or_path in {
+        "open_world_studio_elemental_ability",
+        "add_elemental_ability",
+        "elemental_ability",
+    }:
+        return DEFAULT_ELEMENTAL_ABILITY_EVAL
     if eval_id_or_path in {"demo_game_add_fire_ability", "add_fire_ability", "fireball_hit", "demo_game"}:
         return DEFAULT_DEMO_GAME_EVAL
 
@@ -2056,7 +2063,7 @@ def eval_list() -> dict[str, Any]:
     start = time.perf_counter()
     diagnostics: list[dict[str, Any]] = []
     suites: list[dict[str, Any]] = []
-    for path in sorted({DEFAULT_DEMO_GAME_EVAL, DEFAULT_OPEN_WORLD_EVAL}):
+    for path in sorted({DEFAULT_DEMO_GAME_EVAL, DEFAULT_OPEN_WORLD_EVAL, DEFAULT_ELEMENTAL_ABILITY_EVAL}):
         try:
             suites.append(eval_suite_summary(path))
         except ValidationError as exc:
@@ -2096,6 +2103,8 @@ def run_eval_command(command: str, task: dict[str, Any], project_root: Path) -> 
     if command == "aa index":
         if task.get("category") == "enemy_camp":
             query = "enemy camp sector"
+        elif task.get("category") == "ability" and "open_world_studio" in task.get("project", ""):
+            query = "elemental ranged ability basic_ranged_attack"
         elif task.get("category") == "ability":
             query = "fire ability fireball demo_game"
         else:
@@ -2135,7 +2144,13 @@ def run_eval_command(command: str, task: dict[str, Any], project_root: Path) -> 
         return command_run(command, ["--world", "open_world_studio", "--verify", "--json"], 0, duration_ms), None
 
     if command == "aa playtest":
-        scenario = "fireball_hit" if task.get("category") == "ability" else "open_world_enemy_camp"
+        scenario = (
+            "open_world_enemy_camp"
+            if "open_world_studio" in task.get("project", "")
+            else "fireball_hit"
+            if task.get("category") == "ability"
+            else "open_world_enemy_camp"
+        )
         playtest_result_fixture(scenario)
         duration_ms = int((time.perf_counter() - start) * 1000)
         return command_run(command, ["--scenario", scenario, "--json"], 0, duration_ms), None

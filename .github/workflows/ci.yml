@@ -44,6 +44,10 @@ jobs:
         run: cargo run -p aa_cli -- playtest --project examples/open_world_studio --scenario open_world_sector_traverse --duration 20 --json
       - name: Eval open_world_studio_enemy_camp
         run: cargo run -p aa_cli -- eval run open_world_studio_enemy_camp --json
+      - name: Eval open_world_studio_elemental_ability
+        run: cargo run -p aa_cli -- eval run open_world_studio_elemental_ability --json
+      - name: Config merge order test
+        run: cargo test -p aa_core --test config_merge_order
 
   bootstrap:
     runs-on: ubuntu-latest

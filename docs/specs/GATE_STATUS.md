@@ -24,14 +24,14 @@
 | World inspect | `aa world inspect` → **256 sectors**, **8 layers** (golden fixtures refreshed) |
 | World cook | `aa world cook --verify --json` deterministic `artifacts/cook/*` |
 | Index / eval / scene | Rust `aa index`, `aa eval run` (29/29 acceptance), `aa scene inspect/patch --dry-run` |
-| Bootstrap CLI tests | `python3 docs/specs/tools/test_bootstrap_cli.py` **32/32** |
+| Bootstrap CLI tests | `python3 docs/specs/tools/test_bootstrap_cli.py` **33/33** |
 
 ## Gate P0 - Foundation
 
 | ID | Status | Evidence |
 |----|--------|----------|
 | P0-01 | PASS | `cargo clippy --workspace -- -D warnings` |
-| P0-02 | PARTIAL | Config layers exist; full merge test suite pending |
+| P0-02 | PARTIAL | `cargo test -p aa_core --test config_merge_order` (base → project → CLI) |
 | P0-05 | PARTIAL | Rust `aa validate` JSON + SARIF + prefab/asset soft-ref checks |
 
 **GATE: FAIL**
@@ -60,7 +60,7 @@
 | OWA-05 | PASS | `aa world cook --verify` deterministic artifacts |
 | OWA-06 | PASS | `aa profile summarize` on playtest trace JSON |
 | OWA-07 | PASS | Spawn table pipeline activates `camp_guard_patrol` without fallback |
-| OWA-08 | PARTIAL | `basic_ranged_attack.ron` schema-valid; `add_elemental_ability` eval pending |
+| OWA-08 | PASS | `aa eval run open_world_studio_elemental_ability` + `basic_ranged_attack.ron` |
 
 **GATE: PARTIAL**
 
@@ -95,5 +95,7 @@ cargo run -p aa_cli -- playtest --project examples/open_world_studio --scenario 
 cargo run -p aa_cli -- validate examples/open_world_studio --format json
 cargo run -p aa_cli -- index --query "enemy camp sector" --json
 cargo run -p aa_cli -- eval run open_world_studio_enemy_camp --json
+cargo run -p aa_cli -- eval run open_world_studio_elemental_ability --json
+cargo test -p aa_core --test config_merge_order
 python3 docs/specs/tools/test_bootstrap_cli.py
 ```
