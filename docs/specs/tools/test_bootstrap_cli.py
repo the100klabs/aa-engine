@@ -996,6 +996,13 @@ default_binary = "ability_graph_fixture"
         self.assertGreaterEqual(result["mapped_count"], 50, result)
         self.assertTrue(result["ok"], result.get("errors"))
 
+    def test_playtest_scenario_audit_meets_p3_08_minimum(self) -> None:
+        from audit_playtest_scenarios import audit
+
+        result = audit()
+        self.assertGreaterEqual(result["scenario_count"], 20, result)
+        self.assertTrue(result["ok"], result.get("errors"))
+
 
 if __name__ == "__main__":
     unittest.main()

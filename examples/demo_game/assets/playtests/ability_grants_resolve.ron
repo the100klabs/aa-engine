@@ -1,9 +1,9 @@
 (
     schema_version: 1,
-    id: "smoke",
-    display_name: "Combat Smoke",
-    description: "Baseline combat smoke: experience loads, player fights training dummy.",
-    duration_secs: 12.0,
+    id: "ability_grants_resolve",
+    display_name: "Ability Grants Resolve",
+    description: "Experience grants resolve to loaded handles.",
+    duration_secs: 8.0,
     setup: (
         LoadExperience: "assets/experiences/demo.ron",
     ),

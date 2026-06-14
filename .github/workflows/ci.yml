@@ -79,5 +79,7 @@ jobs:
         run: python3 docs/specs/tools/test_bootstrap_cli.py
       - name: Spec traceability audit (P0-07)
         run: python3 docs/specs/tools/audit_traceability.py
+      - name: Playtest scenario audit (P3-08)
+        run: python3 docs/specs/tools/audit_playtest_scenarios.py
       - name: Validate contract fixtures
         run: python3 docs/specs/tools/validate_contract_fixtures.py

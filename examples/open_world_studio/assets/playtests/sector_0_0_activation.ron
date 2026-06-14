@@ -1,0 +1,25 @@
+(
+    schema_version: 1,
+    id: "sector_0_0_activation",
+    display_name: "Sector 0_0 Activation",
+    description: "Starter sector activates around player source.",
+    duration_secs: 20.0,
+    setup: (
+        LoadWorld: "assets/worlds/open_world_studio.ron",
+    ),
+    assertions: [
+        (
+            name: "no_crash",
+            check: (
+                NoCrash: true,
+            ),
+        ),
+        (
+            name: "sector_0_0_active",
+            check: (
+                SectorActive: "sector_0_0",
+            ),
+        ),
+    ],
+    artifacts: ["log", "trace"],
+)

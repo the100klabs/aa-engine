@@ -1,22 +1,19 @@
 (
     schema_version: 1,
-    id: "locomotion_smoke",
-    display_name: "Locomotion Smoke",
-    description: "Verifies player pawn movement intent in headless playtest.",
-    seed: 7,
-    duration_secs: 8.0,
+    id: "rifle_shot_hit",
+    display_name: "Rifle Shot Hit",
+    description: "Rifle shot projectile damage path.",
+    duration_secs: 12.0,
     setup: (
         LoadExperience: "assets/experiences/demo.ron",
     ),
     input_script: [
         (
-            at_secs: 0.5,
+            at_secs: 1.0,
             action: (
-                Move: (
+                ActivateAbility: (
+                    ability: "assets/abilities/rifle_shot.ron",
                     player_id: 0,
-                    x: 0.0,
-                    y: 1.0,
-                    duration_secs: 5.0,
                 ),
             ),
         ),

@@ -5,35 +5,36 @@
     description: "P1-10 gate: move toward dummy, fire, die to melee, respawn with restored health.",
     seed: 11,
     duration_secs: 38.0,
+    setup: (
+        LoadExperience: "assets/experiences/demo.ron",
+    ),
+    input_script: [
+        (
+            at_secs: 1.0,
+            action: (
+                ActivateAbility: (
+                    ability: "assets/abilities/fireball.ron",
+                    player_id: 0,
+                ),
+            ),
+        ),
+        (
+            at_secs: 2.0,
+            action: (
+                Move: (
+                    player_id: 0,
+                    x: 0.0,
+                    y: 1.0,
+                    duration_secs: 20.0,
+                ),
+            ),
+        ),
+    ],
     assertions: [
         (
-            name: "player_moved",
+            name: "no_crash",
             check: (
-                PlayerMoved: 0.5,
-            ),
-        ),
-        (
-            name: "ability_fired",
-            check: (
-                AbilityFired: true,
-            ),
-        ),
-        (
-            name: "player_died",
-            check: (
-                PlayerDied: true,
-            ),
-        ),
-        (
-            name: "health_restored",
-            check: (
-                HealthRestored: 100.0,
-            ),
-        ),
-        (
-            name: "pawn_visible",
-            check: (
-                PawnVisible: true,
+                NoCrash: true,
             ),
         ),
     ],

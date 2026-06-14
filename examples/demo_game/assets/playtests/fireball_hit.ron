@@ -1,12 +1,41 @@
-PlaytestScenario(
+(
     schema_version: 1,
     id: "fireball_hit",
     display_name: "Fireball Hit",
+    description: "Fireball reduces training dummy Health by 25.",
     duration_secs: 12.0,
-    assertions: [
-        "player_alive",
-        "dummy_damaged",
-        "ability_fired",
-        "target_health_delta",
+    setup: (
+        LoadExperience: "assets/experiences/demo.ron",
+    ),
+    input_script: [
+        (
+            at_secs: 1.0,
+            action: (
+                ActivateAbility: (
+                    ability: "assets/abilities/fireball.ron",
+                    player_id: 0,
+                ),
+            ),
+        ),
     ],
+    assertions: [
+        (
+            name: "dummy_health_delta",
+            check: (
+                AttributeDelta: (
+                    target: "training_dummy",
+                    attribute: "Health",
+                    expected_delta: -25.0,
+                    tolerance: 0.01,
+                ),
+            ),
+        ),
+        (
+            name: "no_crash",
+            check: (
+                NoCrash: true,
+            ),
+        ),
+    ],
+    artifacts: ["log", "trace"],
 )

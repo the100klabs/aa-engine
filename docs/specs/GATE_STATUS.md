@@ -9,7 +9,8 @@
 | Date | 2026-06-14 |
 | Workspace | `aa_engine` (merged runtime + specs) |
 | Repository | https://github.com/the100klabs/aa-engine |
-| Git status | `main` — P0-07 traceability audit (63 REQ mappings), P1/P0/OWA gates PASS |
+| Git status | `main` — P3-08 playtest catalog (23 scenarios), traceability audit |
+| Playtest catalog | 23 schema-valid `assets/playtests/*.ron` scenarios (P3-08 ≥20) |
 | AA CLI | `./aa` prefers Rust `aa_cli`; bootstrap fallback for remaining commands |
 | `aa.project.toml` | Present at repo root and per example project |
 | `config/*.toml` | Present at repo root and example projects |
@@ -36,9 +37,10 @@
 | P0-03 | PASS | `cargo test -p aa_scene --test p0_gates spawn_player_prefab` (prefab root + child ≥ 3 components) |
 | P0-04 | PASS | `cargo test -p aa_core --test schedule_ambiguity` (0 ambiguities, headless AA plugin stack) |
 | P0-05 | PASS | Rust `aa validate` schema subset (world/sector/spawn_table/ability) + SARIF + prefab refs |
+| P0-06 | PARTIAL | Headless cold boot evidenced via CI `playtest smoke` (<45s); visual Win/macOS window boot manual |
 | P0-07 | PASS | `python3 docs/specs/tools/audit_traceability.py` — 63 REQ-* mapped to tests (≥50) |
 
-**GATE: FAIL** (P0-06 manual platform boot not evidenced)
+**GATE: FAIL** (P0-06 visual platform boot manual)
 
 ## Gate P1 - Combat Vertical Slice
 
@@ -95,9 +97,9 @@
 | P3-05 | PASS | Rust `aa eval list/run` with acceptance parity |
 | P3-06 | OPEN | Editor scene save round-trip — manual, no `aa_editor` shell yet |
 | P3-07 | OPEN | RON hot-reload ≤500ms — no automated test |
-| P3-08 | PARTIAL | 6 authored playtest scenarios (`assets/playtests/*.ron`); target ≥20 |
+| P3-08 | PASS | `python3 docs/specs/tools/audit_playtest_scenarios.py` — 23 schema-valid scenarios (≥20) |
 
-**GATE: PARTIAL** (P3-06/07/08 open)
+**GATE: PARTIAL** (P3-06 editor save, P3-07 hot reload open)
 
 ## Commands (success criteria)
 
@@ -117,5 +119,6 @@ cargo test -p aa_core --test config_merge_order
 cargo test -p aa_core --test schedule_ambiguity
 cargo test -p aa_scene --test p0_gates spawn_player_prefab
 python3 docs/specs/tools/audit_traceability.py
+python3 docs/specs/tools/audit_playtest_scenarios.py
 python3 docs/specs/tools/test_bootstrap_cli.py
 ```

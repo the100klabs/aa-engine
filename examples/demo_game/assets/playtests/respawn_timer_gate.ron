@@ -1,9 +1,9 @@
 (
     schema_version: 1,
-    id: "smoke",
-    display_name: "Combat Smoke",
-    description: "Baseline combat smoke: experience loads, player fights training dummy.",
-    duration_secs: 12.0,
+    id: "respawn_timer_gate",
+    display_name: "Respawn Timer Gate",
+    description: "Respawn delay honored before health restore.",
+    duration_secs: 40.0,
     setup: (
         LoadExperience: "assets/experiences/demo.ron",
     ),

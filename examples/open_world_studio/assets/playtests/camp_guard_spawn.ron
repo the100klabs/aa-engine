@@ -1,0 +1,25 @@
+(
+    schema_version: 1,
+    id: "camp_guard_spawn",
+    display_name: "Camp Guard Spawn",
+    description: "Enemy camp spawn table activates guard patrol.",
+    duration_secs: 25.0,
+    setup: (
+        LoadWorld: "assets/worlds/open_world_studio.ron",
+    ),
+    assertions: [
+        (
+            name: "no_crash",
+            check: (
+                NoCrash: true,
+            ),
+        ),
+        (
+            name: "camp_guard_spawned",
+            check: (
+                EntityExists: "camp_guard_patrol",
+            ),
+        ),
+    ],
+    artifacts: ["log", "trace"],
+)

@@ -1,0 +1,36 @@
+(
+    schema_version: 1,
+    id: "streaming_traverse_short",
+    display_name: "Streaming Traverse Short",
+    description: "Short scripted sector traversal.",
+    duration_secs: 20.0,
+    setup: (
+        LoadWorld: "assets/worlds/open_world_studio.ron",
+    ),
+    input_script: [
+        (
+            at_secs: 0.0,
+            action: (
+                MoveStreamingSource: (
+                    speed_mps: 32.0,
+                    direction: [1.0, 0.0, 0.0],
+                ),
+            ),
+        ),
+    ],
+    assertions: [
+        (
+            name: "no_crash",
+            check: (
+                NoCrash: true,
+            ),
+        ),
+        (
+            name: "sectors_traversed",
+            check: (
+                SectorTraversed: 2,
+            ),
+        ),
+    ],
+    artifacts: ["log", "trace"],
+)

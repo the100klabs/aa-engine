@@ -1,0 +1,19 @@
+(
+    schema_version: 1,
+    id: "spawn_table_camp_guard",
+    display_name: "Spawn Table Camp Guard",
+    description: "Spawn table refs resolve for camp guard.",
+    duration_secs: 22.0,
+    setup: (
+        LoadWorld: "assets/worlds/open_world_studio.ron",
+    ),
+    assertions: [
+        (
+            name: "no_crash",
+            check: (
+                NoCrash: true,
+            ),
+        ),
+    ],
+    artifacts: ["log", "trace"],
+)

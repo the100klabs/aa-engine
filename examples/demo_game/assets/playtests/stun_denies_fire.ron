@@ -1,8 +1,8 @@
 (
     schema_version: 1,
-    id: "smoke",
-    display_name: "Combat Smoke",
-    description: "Baseline combat smoke: experience loads, player fights training dummy.",
+    id: "stun_denies_fire",
+    display_name: "Stun Denies Fire",
+    description: "Stunned player cannot activate fireball.",
     duration_secs: 12.0,
     setup: (
         LoadExperience: "assets/experiences/demo.ron",

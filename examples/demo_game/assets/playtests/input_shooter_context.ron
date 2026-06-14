@@ -1,9 +1,9 @@
 (
     schema_version: 1,
-    id: "smoke",
-    display_name: "Combat Smoke",
-    description: "Baseline combat smoke: experience loads, player fights training dummy.",
-    duration_secs: 12.0,
+    id: "input_shooter_context",
+    display_name: "Shooter Input Context",
+    description: "Shooter mapping context loads for player.",
+    duration_secs: 10.0,
     setup: (
         LoadExperience: "assets/experiences/demo.ron",
     ),

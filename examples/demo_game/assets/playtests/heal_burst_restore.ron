@@ -1,22 +1,19 @@
 (
     schema_version: 1,
-    id: "locomotion_smoke",
-    display_name: "Locomotion Smoke",
-    description: "Verifies player pawn movement intent in headless playtest.",
-    seed: 7,
-    duration_secs: 8.0,
+    id: "heal_burst_restore",
+    display_name: "Heal Burst Restore",
+    description: "Player casts heal burst self-target.",
+    duration_secs: 12.0,
     setup: (
         LoadExperience: "assets/experiences/demo.ron",
     ),
     input_script: [
         (
-            at_secs: 0.5,
+            at_secs: 1.0,
             action: (
-                Move: (
+                ActivateAbility: (
+                    ability: "assets/abilities/heal_burst.ron",
                     player_id: 0,
-                    x: 0.0,
-                    y: 1.0,
-                    duration_secs: 5.0,
                 ),
             ),
         ),

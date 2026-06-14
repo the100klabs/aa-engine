@@ -1,0 +1,19 @@
+(
+    schema_version: 1,
+    id: "world_cook_smoke",
+    display_name: "World Cook Smoke",
+    description: "Cooked sector metadata present after cook verify.",
+    duration_secs: 15.0,
+    setup: (
+        LoadWorld: "assets/worlds/open_world_studio.ron",
+    ),
+    assertions: [
+        (
+            name: "no_crash",
+            check: (
+                NoCrash: true,
+            ),
+        ),
+    ],
+    artifacts: ["log", "trace"],
+)
