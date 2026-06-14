@@ -33,9 +33,10 @@
 |----|--------|----------|
 | P0-01 | PASS | `cargo clippy --workspace -- -D warnings` |
 | P0-02 | PASS | `cargo test -p aa_core --test config_merge_order` (REQ-GLOBAL-050 all layers) |
+| P0-03 | PASS | `cargo test -p aa_scene --test p0_gates spawn_player_prefab` (prefab root + child ≥ 3 components) |
 | P0-05 | PASS | Rust `aa validate` schema subset (world/sector/spawn_table/ability) + SARIF + prefab refs |
 
-**GATE: FAIL** (P0-03/04/06/07 not yet evidenced)
+**GATE: FAIL** (P0-04/06/07 not yet evidenced)
 
 ## Gate P1 - Combat Vertical Slice
 
@@ -104,5 +105,6 @@ cargo run -p aa_cli -- eval run open_world_studio_elemental_ability --json
 cargo test -p aa_experience --test p1_gates
 cargo test -p aa_gameplay --test p1_gates
 cargo test -p aa_core --test config_merge_order
+cargo test -p aa_scene --test p0_gates spawn_player_prefab
 python3 docs/specs/tools/test_bootstrap_cli.py
 ```

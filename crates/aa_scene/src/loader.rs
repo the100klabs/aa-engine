@@ -4,7 +4,7 @@ use bevy::{
 };
 use thiserror::Error;
 
-use crate::prefab::{PrefabAsset, PrefabRon};
+use crate::prefab::{PrefabAsset, PrefabAssetData};
 use crate::scene::{SceneAsset, SceneRon};
 use aa_core::SCHEMA_VERSION;
 
@@ -34,7 +34,7 @@ impl AssetLoader for PrefabAssetLoader {
     ) -> Result<Self::Asset, Self::Error> {
         let mut bytes = Vec::new();
         reader.read_to_end(&mut bytes).await?;
-        let PrefabRon::Prefab(data) = ron::de::from_bytes::<PrefabRon>(&bytes)?;
+        let data: PrefabAssetData = ron::de::from_bytes(&bytes)?;
         if data.schema_version != SCHEMA_VERSION {
             return Err(RonAssetLoaderError::UnsupportedSchemaVersion(
                 data.schema_version,

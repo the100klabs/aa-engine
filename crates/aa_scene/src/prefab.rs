@@ -22,13 +22,9 @@ pub struct PrefabEntity {
     pub children: Vec<PrefabEntity>,
 }
 
-/// RON wrapper enum: `Prefab(...)`.
+/// RON on-disk shape: `Prefab(...)`.
 #[derive(Debug, Deserialize)]
-pub(crate) enum PrefabRon {
-    Prefab(PrefabAssetData),
-}
-
-#[derive(Debug, Deserialize)]
+#[serde(rename = "Prefab")]
 pub(crate) struct PrefabAssetData {
     pub schema_version: u32,
     pub id: String,
