@@ -1,6 +1,7 @@
 mod assets;
 mod cook;
 mod inspect;
+mod inspect_live;
 mod loader;
 mod plugin;
 mod profile;
@@ -15,6 +16,7 @@ pub use assets::{
 };
 pub use cook::{cook_world, WorldCookResult};
 pub use inspect::{inspect_world, LiveStateJson, WorldInspectResult};
+pub use inspect_live::inspect_world_live;
 pub use plugin::AaWorldStreamPlugin;
 pub use profile::{summarize_trace, ProfileSummaryResult, StreamingProfileTrace};
 pub use registry::{SectorDiagnostics, SectorRegistry, SectorRuntimeState};

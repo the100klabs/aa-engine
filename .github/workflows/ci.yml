@@ -10,6 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - name: Install Linux dependencies
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends pkg-config libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev libx11-dev
       - name: Cargo check
         run: cargo check --workspace
       - name: Clippy
@@ -24,6 +26,10 @@ jobs:
         run: cargo run -p aa_cli -- index --project . --query "enemy camp sector" --json
       - name: P1 ability unit tests
         run: cargo test -p aa_ability --test p1_gates
+      - name: P1 experience integration test
+        run: cargo test -p aa_experience --test p1_gates
+      - name: P1 gameplay integration test
+        run: cargo test -p aa_gameplay --test p1_gates
       - name: World stream unit tests
         run: cargo test -p aa_world_stream
       - name: Playtest smoke scenario
@@ -34,6 +40,8 @@ jobs:
         run: cargo run -p aa_cli -- playtest --project examples/demo_game --scenario locomotion_smoke --duration 10
       - name: World inspect open_world_studio
         run: cargo run -p aa_cli -- world inspect --project examples/open_world_studio --world open_world_studio --json
+      - name: World inspect open_world_studio live
+        run: cargo run -p aa_cli -- world inspect --project examples/open_world_studio --world open_world_studio --live --json
       - name: World cook open_world_studio
         run: cargo run -p aa_cli -- world cook --project examples/open_world_studio --world open_world_studio --verify --json
       - name: Playtest open_world_enemy_camp
@@ -56,6 +64,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Linux dependencies
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends pkg-config libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev libx11-dev
       - name: Bootstrap CLI contract tests
         run: python3 docs/specs/tools/test_bootstrap_cli.py
       - name: Validate contract fixtures

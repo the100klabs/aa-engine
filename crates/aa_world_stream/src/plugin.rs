@@ -32,7 +32,14 @@ impl Plugin for AaWorldStreamPlugin {
             })
             .init_resource::<StreamingProfileTrace>()
             .add_systems(Startup, bootstrap_world_registry)
-            .add_systems(Update, (finish_pending_world_registry, tick_sector_streaming).chain());
+            .add_systems(
+                Update,
+                (
+                    finish_pending_world_registry,
+                    tick_sector_streaming.run_if(resource_exists::<SectorRegistry>),
+                )
+                    .chain(),
+            );
     }
 }
 

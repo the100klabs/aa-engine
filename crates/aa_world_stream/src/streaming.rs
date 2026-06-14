@@ -90,7 +90,7 @@ pub fn queue_sectors_for_sources(
 pub fn tick_sector_streaming(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut registry: ResMut<SectorRegistry>,
+    registry: Option<ResMut<SectorRegistry>>,
     world_assets: Res<Assets<crate::assets::WorldDescriptorAsset>>,
     sector_assets: Res<Assets<crate::assets::SectorDescriptorAsset>>,
     sources: Query<(&Transform, &StreamingSource)>,
@@ -98,6 +98,9 @@ pub fn tick_sector_streaming(
     time: Res<Time>,
     mut trace: Option<ResMut<StreamingProfileTrace>>,
 ) {
+    let Some(mut registry) = registry else {
+        return;
+    };
     let frame_start = std::time::Instant::now();
 
     let Some(world) = world_assets.get(&registry.world_handle) else {

@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use aa_world_stream::{cook_world, inspect_world};
+use aa_world_stream::{cook_world, inspect_world, inspect_world_live};
 
 use crate::exit_codes::ExitCode;
 use crate::project::{self, ProjectError};
@@ -19,15 +19,11 @@ pub fn inspect(path: &Path, world: &str, live: bool, json: bool) -> ExitCode {
         }
     };
 
-    let live_state = live.then(|| aa_world_stream::LiveStateJson {
-        connected: true,
-        active_sectors: vec!["sector_0_0".into()],
-        loaded_sectors: vec!["sector_0_0".into()],
-        streaming_sources: vec!["player_0".into()],
-        pending_loads: Vec::new(),
-    });
-
-    let result = inspect_world(&project_root, world, live_state);
+    let result = if live {
+        inspect_world_live(&project_root, world)
+    } else {
+        inspect_world(&project_root, world, None)
+    };
 
     if json {
         match serde_json::to_string_pretty(&result) {

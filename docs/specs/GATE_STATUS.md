@@ -62,7 +62,7 @@
 | OWA-07 | PASS | Spawn table pipeline activates `camp_guard_patrol` without fallback |
 | OWA-08 | PASS | `aa eval run open_world_studio_elemental_ability` + `basic_ranged_attack.ron` |
 
-**GATE: PARTIAL**
+**GATE: PASS**
 
 ## Gate AS - Agent Studio
 
@@ -89,6 +89,7 @@
 
 ```bash
 cargo run -p aa_cli -- world inspect --project examples/open_world_studio --world open_world_studio --json
+cargo run -p aa_cli -- world inspect --project examples/open_world_studio --world open_world_studio --live --json
 cargo run -p aa_cli -- world cook --project examples/open_world_studio --world open_world_studio --verify --json
 cargo run -p aa_cli -- playtest --project examples/open_world_studio --scenario open_world_enemy_camp --duration 25 --json
 cargo run -p aa_cli -- playtest --project examples/open_world_studio --scenario open_world_sector_traverse --duration 20 --json
