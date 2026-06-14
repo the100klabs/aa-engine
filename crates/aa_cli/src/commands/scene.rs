@@ -253,10 +253,12 @@ struct SectorRon {
 struct SectorEntityRon {
     prefab: String,
     #[serde(default)]
+    #[allow(dead_code)]
     transform: SectorTransformRon,
 }
 
 #[derive(Debug, Deserialize, Default)]
+#[allow(dead_code)]
 struct SectorTransformRon {
     #[serde(default)]
     translation: (f32, f32, f32),

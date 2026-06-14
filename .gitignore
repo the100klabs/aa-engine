@@ -9,5 +9,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 examples/demo_game/playtest_report.json
+examples/open_world_studio/playtest_report.json
+examples/*/artifacts/
 *.log
 *.trace

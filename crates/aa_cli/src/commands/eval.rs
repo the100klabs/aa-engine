@@ -22,7 +22,10 @@ struct EvalTask {
     category: String,
     required_commands: Vec<String>,
     #[serde(default)]
-    #[allow(dead_code)]
+    expected_files: Vec<String>,
+    #[serde(default)]
+    forbidden_paths: Vec<String>,
+    #[serde(default)]
     acceptance: Vec<serde_json::Map<String, Value>>,
 }
 
@@ -108,13 +111,16 @@ pub fn run_eval(eval_id_or_path: &str, json: bool) -> ExitCode {
                 failures.push(format!("{command}: {f}"));
             }
         }
+        let (acceptance_checks, acceptance_failures) =
+            evaluate_task_acceptance(task, &project_root, &repo, &command_reports);
+        failures.extend(acceptance_failures);
         let passed = failures.is_empty();
         let mut report = serde_json::json!({
             "id": task.id,
             "passed": passed,
             "repair_attempts": 0,
             "commands": command_reports,
-            "acceptance": [],
+            "acceptance": acceptance_checks,
             "artifacts": {},
         });
         if !passed {
@@ -294,6 +300,209 @@ fn run_eval_command(
         "duration_ms": started.elapsed().as_millis(),
     });
     (report, failure)
+}
+
+fn evaluate_task_acceptance(
+    task: &EvalTask,
+    project_root: &Path,
+    repo: &Path,
+    command_reports: &[serde_json::Value],
+) -> (Vec<serde_json::Value>, Vec<String>) {
+    let mut checks = Vec::new();
+    let mut failures = Vec::new();
+
+    for expected_path in &task.expected_files {
+        let path = repo.join(expected_path);
+        let passed = path.is_file();
+        checks.push(acceptance_item(
+            format!("ExpectedFile:{expected_path}"),
+            passed,
+            if passed {
+                None
+            } else {
+                Some("expected task file is missing".into())
+            },
+        ));
+        if !passed {
+            failures.push(format!("expected file missing: {expected_path}"));
+        }
+    }
+
+    for forbidden in &task.forbidden_paths {
+        let matches = forbidden_path_matches(project_root, forbidden);
+        let passed = matches.is_empty();
+        checks.push(acceptance_item(
+            format!("ForbiddenPathAbsent:{forbidden}"),
+            passed,
+            if passed {
+                None
+            } else {
+                Some(format!("found forbidden paths: {}", matches.join(", ")))
+            },
+        ));
+        if !passed {
+            failures.push(format!("forbidden path present: {forbidden}"));
+        }
+    }
+
+    for acceptance in &task.acceptance {
+        let Some((kind, value)) = acceptance.iter().next() else {
+            continue;
+        };
+        match kind.as_str() {
+            "CommandPasses" => {
+                let command = value.as_str().unwrap_or_default();
+                let passed = command_passed(command_reports, command);
+                checks.push(acceptance_item(format!("CommandPasses:{command}"), passed, None));
+                if !passed {
+                    failures.push(format!("acceptance command failed: {command}"));
+                }
+            }
+            "PlaytestPasses" => {
+                let scenario = value.as_str().unwrap_or_default();
+                let passed = playtest_passes(project_root, scenario);
+                checks.push(acceptance_item(format!("PlaytestPasses:{scenario}"), passed, None));
+                if !passed {
+                    failures.push(format!("playtest acceptance failed: {scenario}"));
+                }
+            }
+            "FileChanged" => {
+                let path_value = value.as_str().unwrap_or_default();
+                let path = repo.join(path_value);
+                let passed = path.is_file();
+                checks.push(acceptance_item(
+                    format!("FileChanged:{path_value}"),
+                    passed,
+                    Some("eval verifies the authored file is present".into()),
+                ));
+                if !passed {
+                    failures.push(format!("file acceptance missing: {path_value}"));
+                }
+            }
+            "NoWritesOutsideAllowlist" => {
+                let forbidden_failures: Vec<String> = task
+                    .forbidden_paths
+                    .iter()
+                    .filter(|f| !forbidden_path_matches(project_root, f).is_empty())
+                    .cloned()
+                    .collect();
+                let passed = value.as_bool().unwrap_or(false) && forbidden_failures.is_empty();
+                checks.push(acceptance_item(
+                    "NoWritesOutsideAllowlist".into(),
+                    passed,
+                    if passed {
+                        None
+                    } else {
+                        Some(format!(
+                            "forbidden paths present: {}",
+                            forbidden_failures.join(", ")
+                        ))
+                    },
+                ));
+                if !passed {
+                    failures.push("writes outside allowlist".into());
+                }
+            }
+            "ProfileBudgetWithin" => {
+                let metric = value
+                    .get("metric")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or_default();
+                let maximum = value
+                    .get("max")
+                    .and_then(|v| v.as_f64())
+                    .unwrap_or(f64::MAX);
+                let actual = profile_metric_value(repo, project_root, metric);
+                let passed = actual.is_some_and(|a| a <= maximum);
+                let message = actual
+                    .map(|a| format!("actual={a} max={maximum}"))
+                    .unwrap_or_else(|| "metric missing".into());
+                checks.push(acceptance_item(
+                    format!("ProfileBudgetWithin:{metric}"),
+                    passed,
+                    Some(message),
+                ));
+                if !passed {
+                    failures.push(format!("profile budget failed: {metric}"));
+                }
+            }
+            other => {
+                checks.push(acceptance_item(format!("UnsupportedAcceptance:{other}"), false, None));
+                failures.push(format!("unsupported acceptance: {other}"));
+            }
+        }
+    }
+
+    (checks, failures)
+}
+
+fn acceptance_item(name: String, passed: bool, message: Option<String>) -> serde_json::Value {
+    let mut item = serde_json::json!({
+        "name": name,
+        "passed": passed,
+    });
+    if let Some(message) = message {
+        item["message"] = Value::String(message);
+    }
+    item
+}
+
+fn command_passed(command_reports: &[serde_json::Value], command: &str) -> bool {
+    command_reports.iter().any(|report| {
+        report.get("command").and_then(|v| v.as_str()) == Some(command)
+            && report.get("exit_code").and_then(|v| v.as_i64()) == Some(0)
+    })
+}
+
+fn forbidden_path_matches(project_root: &Path, forbidden: &str) -> Vec<String> {
+    let mut matches = Vec::new();
+    let direct = project_root.join(forbidden);
+    if direct.exists() {
+        matches.push(rel_path(project_root, &direct));
+    }
+    for entry in walkdir::WalkDir::new(project_root)
+        .into_iter()
+        .filter_map(Result::ok)
+    {
+        let path = entry.path();
+        if path == direct {
+            continue;
+        }
+        if path
+            .components()
+            .any(|component| component.as_os_str() == forbidden)
+            && path.exists()
+        {
+            matches.push(rel_path(project_root, path));
+        }
+    }
+    matches.sort();
+    matches.dedup();
+    matches
+}
+
+fn playtest_passes(project_root: &Path, _scenario: &str) -> bool {
+    let report_path = project_root.join("playtest_report.json");
+    let Ok(text) = std::fs::read_to_string(&report_path) else {
+        return false;
+    };
+    let Ok(report) = serde_json::from_str::<serde_json::Value>(&text) else {
+        return false;
+    };
+    report.get("ok").and_then(|v| v.as_bool()).unwrap_or(false)
+}
+
+fn profile_metric_value(repo: &Path, project_root: &Path, metric: &str) -> Option<f64> {
+    let trace = project_root.join("artifacts/profiles/open_world_enemy_camp.trace");
+    let summary = aa_world_stream::summarize_trace(&trace, repo);
+    match metric {
+        "sector_load_p95_ms" => Some(summary.sector_streaming.load_latency.p95_ms as f64),
+        "sector_crossing_hitch_ms" => Some(summary.sector_streaming.crossing_hitch_ms as f64),
+        "frame_cpu_p95_ms" => Some(summary.frame.cpu.p95_ms as f64),
+        "frame_gpu_p95_ms" => Some(summary.frame.gpu.p95_ms as f64),
+        "memory_peak_mb" => Some(summary.memory.peak_mb as f64),
+        _ => None,
+    }
 }
 
 fn run_aa(repo: &Path, args: &[&str]) -> i32 {
