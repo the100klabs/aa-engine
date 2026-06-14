@@ -54,7 +54,7 @@
 | ID | Status | Evidence |
 |----|--------|----------|
 | OWA-01 | PASS | 16×16 sector grid @ 256m = 16 km² (256 sectors) |
-| OWA-02 | PARTIAL | Runtime `aa world inspect` + `--live` stub |
+| OWA-02 | PASS | Runtime `aa world inspect --live` snapshots `SectorRegistry` via headless app |
 | OWA-03 | PASS | 8 data layers in world descriptor |
 | OWA-04 | PASS | `open_world_enemy_camp` + `open_world_sector_traverse` playtests in CI |
 | OWA-05 | PASS | `aa world cook --verify` deterministic artifacts |
