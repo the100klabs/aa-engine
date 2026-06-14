@@ -1,0 +1,3 @@
+# Platform layer (REQ-GLOBAL-050) — macOS overrides.
+[app]
+vsync = true

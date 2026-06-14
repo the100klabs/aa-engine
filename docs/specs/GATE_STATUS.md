@@ -9,7 +9,7 @@
 | Date | 2026-06-14 |
 | Workspace | `aa_engine` (merged runtime + specs) |
 | Repository | https://github.com/the100klabs/aa-engine |
-| Git status | `bec89f3` — schema validate, P1 integration gates, live world inspect |
+| Git status | `main` — P0-02 config layers, P1-08 RON ability audit |
 | AA CLI | `./aa` prefers Rust `aa_cli`; bootstrap fallback for remaining commands |
 | `aa.project.toml` | Present at repo root and per example project |
 | `config/*.toml` | Present at repo root and example projects |
@@ -32,10 +32,10 @@
 | ID | Status | Evidence |
 |----|--------|----------|
 | P0-01 | PASS | `cargo clippy --workspace -- -D warnings` |
-| P0-02 | PARTIAL | `cargo test -p aa_core --test config_merge_order` (base → project → CLI) |
+| P0-02 | PASS | `cargo test -p aa_core --test config_merge_order` (REQ-GLOBAL-050 all layers) |
 | P0-05 | PASS | Rust `aa validate` schema subset (world/sector/spawn_table/ability) + SARIF + prefab refs |
 
-**GATE: FAIL**
+**GATE: FAIL** (P0-03/04/06/07 not yet evidenced)
 
 ## Gate P1 - Combat Vertical Slice
 
@@ -48,9 +48,10 @@
 | P1-05 | PASS | `stun_blocks_fire` unit test |
 | P1-06 | PASS | `cargo test -p aa_experience --test p1_gates` — `ExperienceReady` + ability grants resolve |
 | P1-07 | PASS | `cargo test -p aa_gameplay --test p1_gates` — attribute set + input context + `PendingInit` cleared |
+| P1-08 | PASS | `cargo test -p aa_ability --test p1_gates data_driven_abilities_ron_only_audit` (4 RON abilities) |
 | P1-09 | PASS | `bench_100_asc` criterion bench in `aa_ability` |
 
-**GATE: FAIL** (P1-08 data-driven audit, P1-10 human play loop still open)
+**GATE: FAIL** (P1-10 human play loop still open)
 
 ## Gate OWA - Open World Alpha
 

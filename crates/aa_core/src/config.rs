@@ -8,12 +8,17 @@ use crate::paths::project_root;
 
 const ENGINE_BASE_TOML: &str = include_str!("engine_base.toml");
 
-const CONFIG_FILES: &[&str] = &[
-    "config/engine.toml",
-    "config/game.toml",
-    "config/scalability.toml",
-    "config/user.toml",
-];
+/// Project file layers merged after `engine_base` per REQ-GLOBAL-050:
+/// engine → platform → game → user → CLI.
+fn project_config_layers() -> Vec<String> {
+    let os = std::env::consts::OS;
+    vec![
+        "config/engine.toml".into(),
+        format!("config/platforms/{os}.toml"),
+        "config/game.toml".into(),
+        "config/user.toml".into(),
+    ]
+}
 
 /// Layered TOML configuration merged from engine defaults and project files.
 #[derive(Resource, Debug, Clone)]
@@ -27,8 +32,8 @@ impl ConfigProvider {
     pub fn load(project_root: &Path) -> Result<Self, ConfigError> {
         let mut file_layers = parse_toml_str(ENGINE_BASE_TOML, "engine_base")?;
 
-        for relative in CONFIG_FILES {
-            merge_optional_file(&mut file_layers, &project_root.join(relative))?;
+        for relative in project_config_layers() {
+            merge_optional_file(&mut file_layers, &project_root.join(&relative))?;
         }
 
         Ok(Self {
@@ -69,11 +74,10 @@ impl ConfigProvider {
             toml::Value::Float(float)
         } else if let Ok(boolean) = value.parse::<bool>() {
             toml::Value::Boolean(boolean)
+        } else if let Ok(parsed) = value.parse::<toml::Value>() {
+            parsed
         } else {
-            value.parse().map_err(|source| ConfigError::Parse {
-                key: key.to_owned(),
-                source: Box::new(source),
-            })?
+            toml::Value::String(value.to_owned())
         };
         set_at_dot_path(&mut self.cli_overrides, key, parsed);
         Ok(())

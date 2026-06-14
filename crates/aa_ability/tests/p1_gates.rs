@@ -200,3 +200,54 @@ fn stun_blocks_fire_activation() {
 
 #[derive(Component)]
 struct PlayerStateMarker;
+
+/// Gate P1-08: combat abilities are authored as RON assets (≥3) and granted via experience.
+#[test]
+fn data_driven_abilities_ron_only_audit() {
+    use std::path::PathBuf;
+
+    let demo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../examples/demo_game");
+    let abilities_dir = demo_root.join("assets/abilities");
+    let experience_path = demo_root.join("assets/experiences/demo.ron");
+
+    let experience = std::fs::read_to_string(&experience_path)
+        .expect("demo experience asset must exist for P1-08 audit");
+
+    let mut ability_paths = Vec::new();
+    for entry in std::fs::read_dir(&abilities_dir).expect("abilities directory must exist") {
+        let entry = entry.expect("abilities dir entry");
+        let path = entry.path();
+        if path.extension().is_none_or(|ext| ext != "ron") {
+            continue;
+        }
+        let text = std::fs::read_to_string(&path).expect("ability RON must be readable");
+        assert!(
+            text.contains("schema_version"),
+            "{} must declare schema_version",
+            path.display()
+        );
+        assert!(
+            text.contains("GameplayAbility"),
+            "{} must be a GameplayAbility asset",
+            path.display()
+        );
+        let stem = path
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .expect("ability filename");
+        let asset_path = format!("abilities/{stem}");
+        assert!(
+            experience.contains(&asset_path),
+            "experience demo must grant data-driven ability `{asset_path}`"
+        );
+        ability_paths.push(asset_path);
+    }
+
+    ability_paths.sort();
+    ability_paths.dedup();
+    assert!(
+        ability_paths.len() >= 3,
+        "P1-08 requires at least 3 RON-only abilities, found {:?}",
+        ability_paths
+    );
+}
