@@ -24,12 +24,18 @@ jobs:
         run: cargo run -p aa_cli -- validate examples/demo_game --format sarif
       - name: Index enemy camp query
         run: cargo run -p aa_cli -- index --project . --query "enemy camp sector" --json
+      - name: P0 prefab spawn test
+        run: cargo test -p aa_scene --test p0_gates spawn_player_prefab
+      - name: P0 schedule ambiguity test
+        run: cargo test -p aa_core --test schedule_ambiguity
       - name: P1 ability unit tests
         run: cargo test -p aa_ability --test p1_gates
       - name: P1 experience integration test
         run: cargo test -p aa_experience --test p1_gates
       - name: P1 gameplay integration test
         run: cargo test -p aa_gameplay --test p1_gates
+      - name: P1 gameplay death loop test
+        run: cargo test -p aa_gameplay --test death_loop
       - name: World stream unit tests
         run: cargo test -p aa_world_stream
       - name: Playtest smoke scenario

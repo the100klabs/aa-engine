@@ -9,7 +9,7 @@
 | Date | 2026-06-14 |
 | Workspace | `aa_engine` (merged runtime + specs) |
 | Repository | https://github.com/the100klabs/aa-engine |
-| Git status | `main` — P0-02 config layers, P1-08 RON ability audit |
+| Git status | `f4fca97` — P0-03/04, P1-10 death_respawn, P1 gate PASS |
 | AA CLI | `./aa` prefers Rust `aa_cli`; bootstrap fallback for remaining commands |
 | `aa.project.toml` | Present at repo root and per example project |
 | `config/*.toml` | Present at repo root and example projects |
