@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "description": "Curated REQ-* → automated test evidence map for P0-07 traceability gate.",
+  "mappings": [
+    { "req_id": "REQ-GLOBAL-001", "evidence": "rust_test:crates/aa_core/tests/schedule_ambiguity.rs:schedule_ambiguity" },
+    { "req_id": "REQ-GLOBAL-010", "evidence": "rust_test:crates/aa_ability/tests/p1_gates.rs:asc_on_player_state_survives_pawn_despawn" },
+    { "req_id": "REQ-GLOBAL-012", "evidence": "rust_test:crates/aa_gameplay/tests/p1_gates.rs:pawn_init_chain" },
+    { "req_id": "REQ-GLOBAL-020", "evidence": "rust_test:crates/aa_ability/tests/p1_gates.rs:effect_modifies_attribute_only_via_gameplay_effect" },
+    { "req_id": "REQ-GLOBAL-040", "evidence": "cli:cargo run -p aa_cli -- validate examples/open_world_studio --format json" },
+    { "req_id": "REQ-GLOBAL-042", "evidence": "cli:cargo run -p aa_cli -- validate examples/demo_game --format sarif" },
+    { "req_id": "REQ-GLOBAL-050", "evidence": "rust_test:crates/aa_core/tests/config_merge_order.rs:req_global_050_layer_precedence_in_temp_project" },
+    { "req_id": "REQ-GLOBAL-061", "evidence": "bootstrap:test_validate_demo_game_contract_project" },
+
+    { "req_id": "REQ-CORE-002", "evidence": "rust_test:crates/aa_core/tests/config_merge_order.rs:config_merge_order_applies_engine_base_then_project_layers" },
+    { "req_id": "REQ-CORE-004", "evidence": "rust_test:crates/aa_core/tests/config_merge_order.rs:cli_override_wins_over_file_layers" },
+    { "req_id": "REQ-CORE-006", "evidence": "rust_test:crates/aa_core/tests/schedule_ambiguity.rs:schedule_ambiguity" },
+    { "req_id": "REQ-CORE-010", "evidence": "rust_test:crates/aa_core/tests/config_merge_order.rs:demo_game_engine_overrides_engine_base_window_title" },
+
+    { "req_id": "REQ-SCENE-001", "evidence": "rust_test:crates/aa_scene/tests/p0_gates.rs:spawn_player_prefab" },
+    { "req_id": "REQ-SCENE-002", "evidence": "rust_test:crates/aa_scene/tests/p0_gates.rs:spawn_player_prefab" },
+    { "req_id": "REQ-SCENE-010", "evidence": "bootstrap:test_scene_patch_dry_run_reports_affected_files_without_mutation" },
+
+    { "req_id": "REQ-GAME-006", "evidence": "playtest:death_respawn" },
+    { "req_id": "REQ-GAME-007", "evidence": "playtest:death_respawn" },
+    { "req_id": "REQ-GAME-011", "evidence": "rust_test:crates/aa_gameplay/tests/p1_gates.rs:pawn_init_chain" },
+    { "req_id": "REQ-GAME-012", "evidence": "rust_test:crates/aa_gameplay/tests/p1_gates.rs:pawn_init_chain" },
+    { "req_id": "REQ-GAME-015", "evidence": "rust_test:crates/aa_experience/tests/p1_gates.rs:experience_load" },
+
+    { "req_id": "REQ-ABILITY-020", "evidence": "rust_test:crates/aa_ability/tests/p1_gates.rs:effect_modifies_attribute_only_via_gameplay_effect" },
+    { "req_id": "REQ-ABILITY-040", "evidence": "rust_test:crates/aa_ability/tests/p1_gates.rs:stun_blocks_fire_activation" },
+    { "req_id": "REQ-ABILITY-001", "evidence": "rust_test:crates/aa_ability/tests/p1_gates.rs:asc_on_player_state_survives_pawn_despawn" },
+
+    { "req_id": "REQ-EXP-001", "evidence": "rust_test:crates/aa_experience/tests/p1_gates.rs:experience_load" },
+    { "req_id": "REQ-EXP-010", "evidence": "rust_test:crates/aa_experience/tests/p1_gates.rs:experience_load" },
+
+    { "req_id": "REQ-TAG-004", "evidence": "rust_test:crates/aa_ability/tests/p1_gates.rs:stun_blocks_fire_activation" },
+    { "req_id": "REQ-TAG-005", "evidence": "bootstrap:test_ability_graph_reports_unregistered_tags" },
+
+    { "req_id": "REQ-INPUT-001", "evidence": "rust_test:crates/aa_gameplay/tests/p1_gates.rs:pawn_init_chain" },
+
+    { "req_id": "REQ-STREAM-001", "evidence": "rust_test:crates/aa_world_stream/src/inspect.rs:inspect_open_world_studio_contract_package" },
+    { "req_id": "REQ-STREAM-009", "evidence": "cli:cargo run -p aa_cli -- validate examples/open_world_studio --format json" },
+    { "req_id": "REQ-STREAM-017", "evidence": "rust_test:crates/aa_world_stream/src/inspect_live.rs:inspect_open_world_studio_live_reports_registry_sectors" },
+    { "req_id": "REQ-STREAM-018", "evidence": "rust_test:crates/aa_world_stream/src/inspect.rs:inspect_open_world_studio_contract_package" },
+    { "req_id": "REQ-STREAM-019", "evidence": "cli:cargo run -p aa_cli -- world cook --project examples/open_world_studio --world open_world_studio --verify --json" },
+    { "req_id": "REQ-STREAM-024", "evidence": "cli:cargo run -p aa_cli -- profile summarize examples/open_world_studio/artifacts/profiles/open_world_enemy_camp.trace --json" },
+    { "req_id": "REQ-STREAM-027", "evidence": "cli:cargo run -p aa_cli -- validate examples/open_world_studio --format json" },
+    { "req_id": "REQ-STREAM-028", "evidence": "cli:cargo run -p aa_cli -- world inspect --project examples/open_world_studio --world open_world_studio --json" },
+    { "req_id": "REQ-STREAM-031", "evidence": "cli:cargo run -p aa_cli -- world inspect --project examples/open_world_studio --world open_world_studio --json" },
+    { "req_id": "REQ-STREAM-032", "evidence": "cli:cargo run -p aa_cli -- validate examples/open_world_studio --format json" },
+    { "req_id": "REQ-STREAM-034", "evidence": "rust_test:crates/aa_world_stream/src/spawn.rs:load_open_world_enemy_camp_spawn_table" },
+    { "req_id": "REQ-STREAM-036", "evidence": "cli:cargo run -p aa_cli -- world cook --project examples/open_world_studio --world open_world_studio --verify --json" },
+
+    { "req_id": "REQ-CLI-002", "evidence": "cli:cargo run -p aa_cli -- validate examples/open_world_studio --format json" },
+    { "req_id": "REQ-CLI-005", "evidence": "cli:cargo run -p aa_cli -- validate examples/demo_game --format sarif" },
+    { "req_id": "REQ-CLI-007", "evidence": "playtest:smoke" },
+    { "req_id": "REQ-CLI-009", "evidence": "cli:cargo run -p aa_cli -- index --query enemy camp sector --json" },
+    { "req_id": "REQ-CLI-010", "evidence": "bootstrap:test_scene_patch_dry_run_reports_affected_files_without_mutation" },
+    { "req_id": "REQ-CLI-016", "evidence": "cli:cargo run -p aa_cli -- world inspect --project examples/open_world_studio --world open_world_studio --json" },
+    { "req_id": "REQ-CLI-017", "evidence": "cli:cargo run -p aa_cli -- world inspect --project examples/open_world_studio --world open_world_studio --live --json" },
+    { "req_id": "REQ-CLI-020", "evidence": "cli:cargo run -p aa_cli -- world cook --project examples/open_world_studio --world open_world_studio --verify --json" },
+    { "req_id": "REQ-CLI-022", "evidence": "cli:cargo run -p aa_cli -- eval run open_world_studio_enemy_camp --json" },
+    { "req_id": "REQ-CLI-024", "evidence": "cli:cargo run -p aa_cli -- profile summarize examples/open_world_studio/artifacts/profiles/open_world_enemy_camp.trace --json" },
+    { "req_id": "REQ-CLI-041", "evidence": "bootstrap:test_index_open_world_scope_returns_editable_assets" },
+    { "req_id": "REQ-CLI-044", "evidence": "bootstrap:test_validate_demo_game_contract_project" },
+    { "req_id": "REQ-CLI-047", "evidence": "playtest:fireball_hit" },
+    { "req_id": "REQ-CLI-048", "evidence": "bootstrap:test_eval_open_world_fixture_passes_contract_loop" },
+    { "req_id": "REQ-CLI-050", "evidence": "cli:cargo run -p aa_cli -- world inspect --project examples/open_world_studio --world open_world_studio --json" },
+    { "req_id": "REQ-CLI-051", "evidence": "cli:cargo run -p aa_cli -- world cook --project examples/open_world_studio --world open_world_studio --verify --json" },
+    { "req_id": "REQ-CLI-052", "evidence": "cli:cargo run -p aa_cli -- profile summarize examples/open_world_studio/artifacts/profiles/open_world_enemy_camp.trace --json" },
+
+    { "req_id": "REQ-ASSET-001", "evidence": "rust_test:crates/aa_assets/src/manifest.rs:deserializes_asset_manifest_json" },
+    { "req_id": "REQ-ASSET-010", "evidence": "bootstrap:test_validate_demo_game_contract_project" },
+
+    { "req_id": "REQ-PHY-001", "evidence": "playtest:locomotion_smoke" },
+
+    { "req_id": "REQ-GAME-004", "evidence": "rust_test:crates/aa_gameplay/tests/p1_gates.rs:pawn_init_chain" },
+    { "req_id": "REQ-GAME-005", "evidence": "rust_test:crates/aa_gameplay/tests/p1_gates.rs:pawn_init_chain" },
+    { "req_id": "REQ-GAME-016", "evidence": "rust_test:crates/aa_gameplay/tests/death_loop.rs:dummy_melee_kills_player" }
+  ]
+}

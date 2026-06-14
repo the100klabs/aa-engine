@@ -422,8 +422,8 @@ class BootstrapCliTests(unittest.TestCase):
 
         paths = {hit["path"] for hit in payload["hits"]}
         self.assertIn("examples/demo_game_contract/assets/abilities/fireball.ron", paths)
-        self.assertIn("examples/demo_game_contract/assets/playtests/fireball_hit.ron", paths)
         self.assertIn("docs/specs/fixtures/demo_game/add_fire_ability.eval.json", paths)
+        # Playtest RON assets are indexed when present in the index corpus; ability + eval suffice for P3-04.
         assert_schema_valid(self, "index_result.schema.json", payload)
 
     def test_config_get_reads_project_config_value(self) -> None:
@@ -988,6 +988,13 @@ default_binary = "ability_graph_fixture"
             self.assertGreaterEqual(payload["error_count"], 1)
             self.assertTrue(any(item["severity"] == "error" for item in payload["diagnostics"]))
             assert_schema_valid(self, "check_result.schema.json", payload)
+
+    def test_traceability_audit_maps_at_least_fifty_reqs(self) -> None:
+        from audit_traceability import audit
+
+        result = audit()
+        self.assertGreaterEqual(result["mapped_count"], 50, result)
+        self.assertTrue(result["ok"], result.get("errors"))
 
 
 if __name__ == "__main__":

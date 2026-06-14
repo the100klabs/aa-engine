@@ -77,5 +77,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends pkg-config libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev libx11-dev
       - name: Bootstrap CLI contract tests
         run: python3 docs/specs/tools/test_bootstrap_cli.py
+      - name: Spec traceability audit (P0-07)
+        run: python3 docs/specs/tools/audit_traceability.py
       - name: Validate contract fixtures
         run: python3 docs/specs/tools/validate_contract_fixtures.py
