@@ -1,10 +1,8 @@
 use bevy::prelude::*;
 
-use aa_ability::{apply_gameplay_effect, AttributeSet, GameplayEffectAsset};
-use aa_scene::Possesses;
-use aa_tags::TagRegistry;
+use aa_ability::{AttributeSet, ApplyEffectRequest};
 
-use crate::components::{ControlsPlayer, Pawn, PlayerController};
+use crate::components::{Pawn, PlayerState};
 use crate::spawn::TrainingDummy;
 
 /// Simple melee profile for the training dummy.
@@ -28,31 +26,21 @@ impl Default for DummyCombat {
 }
 
 /// Applies melee gameplay effects to the player when they enter dummy range.
-#[allow(clippy::too_many_arguments)]
 pub fn tick_dummy_combat(
-    mut commands: Commands,
     time: Res<Time>,
-    asset_server: Res<AssetServer>,
-    effects: Res<Assets<GameplayEffectAsset>>,
-    tag_registry: Res<TagRegistry>,
     mut dummies: Query<(&Transform, &mut DummyCombat), With<TrainingDummy>>,
-    controllers: Query<(&ControlsPlayer, &Possesses), With<PlayerController>>,
+    player_states: Query<(Entity, &AttributeSet), With<PlayerState>>,
     pawns: Query<&Transform, With<Pawn>>,
-    mut tags: Query<&mut aa_tags::GameplayTags>,
-    mut attributes: Query<&mut AttributeSet>,
-    mut active_effects: Query<&mut aa_ability::ActiveEffects>,
-    mut cue_writer: MessageWriter<aa_ability::GameplayCueEvent>,
-    mut damage_writer: MessageWriter<aa_ability::DamageAppliedEvent>,
+    mut effect_requests: MessageWriter<ApplyEffectRequest>,
 ) {
     let dt = time.delta_secs();
 
-    let player_target = controllers.iter().next().and_then(|(controls, possesses)| {
-        let pawn_ok = pawns.get(possesses.0).ok()?;
-        let state_ok = attributes.get(controls.0).ok()?;
-        if state_ok.get("Health").unwrap_or(1.0) <= 0.0 {
+    let player_target = player_states.iter().next().and_then(|(state_entity, attrs)| {
+        if attrs.get("Health").unwrap_or(1.0) <= 0.0 {
             return None;
         }
-        Some((controls.0, pawn_ok.translation))
+        let pos = pawns.iter().next()?.translation;
+        Some((state_entity, pos))
     });
 
     let Some((player_state, player_pos)) = player_target else {
@@ -66,23 +54,11 @@ pub fn tick_dummy_combat(
             continue;
         }
 
-        let path = format!("{}.ron", combat.damage_effect);
-        let handle: Handle<GameplayEffectAsset> = asset_server.load(&path);
-        if let Some(effect) = effects.get(&handle) {
-            apply_gameplay_effect(
-                &mut commands,
-                player_state,
-                effect,
-                handle,
-                &tag_registry,
-                &mut tags,
-                &mut attributes,
-                &mut active_effects,
-                &mut cue_writer,
-                &mut damage_writer,
-                player_state,
-            );
-        }
+        effect_requests.write(ApplyEffectRequest {
+            target: player_state,
+            effect_path: combat.damage_effect.clone(),
+            source: player_state,
+        });
         combat.timer = combat.cooldown_secs;
     }
 }

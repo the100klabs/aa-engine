@@ -38,6 +38,8 @@ jobs:
         run: cargo run -p aa_cli -- playtest --project examples/demo_game --scenario fireball_hit --duration 12
       - name: Playtest locomotion_smoke scenario
         run: cargo run -p aa_cli -- playtest --project examples/demo_game --scenario locomotion_smoke --duration 10
+      - name: Playtest death_respawn scenario (P1-10)
+        run: cargo run -p aa_cli -- playtest --project examples/demo_game --scenario death_respawn --duration 38
       - name: World inspect open_world_studio
         run: cargo run -p aa_cli -- world inspect --project examples/open_world_studio --world open_world_studio --json
       - name: World inspect open_world_studio live

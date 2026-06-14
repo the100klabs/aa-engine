@@ -86,6 +86,7 @@ pub fn run() {
         (
             playtest_wait_for_combat,
             playtest_track_movement,
+            playtest_track_death_respawn,
             playtest_step,
         )
             .chain(),
@@ -115,6 +116,11 @@ struct PlaytestState {
     final_player_pos: Option<Vec3>,
     movement_intent_seen: bool,
     move_input_sent: bool,
+    player_died: bool,
+    player_respawned: bool,
+    pawn_visible: bool,
+    final_player_health: Option<f32>,
+    min_player_health: Option<f32>,
     finished: bool,
 }
 
@@ -219,11 +225,34 @@ fn playtest_inject_input(
     let t = state.combat_elapsed;
 
     // Walk toward the dummy once attributes and aim are ready.
-    if state.combat_ready && config.scenario != "fireball_hit" && config.scenario != "locomotion_smoke" {
+    if state.combat_ready
+        && config.scenario != "fireball_hit"
+        && config.scenario != "locomotion_smoke"
+        && config.scenario != "death_respawn"
+    {
         writer.write(InputActionEvent {
             action: InputActionId("Move".into()),
             value: InputActionValue::Axis2D(Vec2::new(0.0, 1.0)),
         });
+    }
+
+    if config.scenario == "death_respawn" {
+        // Aim yaw is +X; Move (0, -1) resolves to +X after camera-relative rotation.
+        if state.combat_ready && t <= 0.9 {
+            writer.write(InputActionEvent {
+                action: InputActionId("Move".into()),
+                value: InputActionValue::Axis2D(Vec2::new(0.0, -1.0)),
+            });
+            state.move_input_sent = true;
+        }
+        if state.combat_ready && t > 1.0 && t < 1.1 {
+            writer.write(InputActionEvent {
+                action: InputActionId("Fire".into()),
+                value: InputActionValue::Digital(true),
+            });
+            state.ability_fired = true;
+        }
+        return;
     }
 
     if config.scenario == "locomotion_smoke" {
@@ -283,13 +312,64 @@ fn playtest_inject_input(
     let _ = &config.scenario;
 }
 
+/// Tracks death and respawn for the P1-10 combat loop gate.
+#[allow(clippy::type_complexity)]
+fn playtest_track_death_respawn(
+    config: Res<PlaytestConfig>,
+    mut state: ResMut<PlaytestState>,
+    tag_registry: Res<aa_tags::TagRegistry>,
+    players: Query<
+        (&aa_ability::AttributeSet, &aa_tags::GameplayTags),
+        With<aa_gameplay::PlayerState>,
+    >,
+    controllers: Query<&aa_scene::Possesses, With<aa_gameplay::PlayerController>>,
+    pawns: Query<Entity, With<aa_gameplay::Pawn>>,
+    visibility: Query<&Visibility>,
+) {
+    if config.scenario != "death_respawn" || !state.combat_ready {
+        return;
+    }
+
+    for (attrs, tags) in &players {
+        let health = attrs.get("Health").unwrap_or(0.0);
+        state.final_player_health = Some(health);
+        state.min_player_health = Some(state.min_player_health.map_or(health, |min| min.min(health)));
+        if health <= 0.0
+            || tags.evaluate(
+                &tag_registry,
+                &aa_tags::TagQuery::has_all(["State.Dead"]),
+            )
+        {
+            state.player_died = true;
+        }
+        if state.player_died && health >= 99.9 {
+            state.player_respawned = true;
+        }
+    }
+
+    if state.player_respawned {
+        for possesses in &controllers {
+            let hidden = visibility
+                .get(possesses.0)
+                .is_ok_and(|value| *value == Visibility::Hidden);
+            if !hidden {
+                state.pawn_visible = true;
+            }
+        }
+        if !state.pawn_visible && pawns.iter().next().is_some() {
+            // Default Bevy visibility is visible when the component is absent.
+            state.pawn_visible = true;
+        }
+    }
+}
+
 /// Records that movement intent reached the pawn (P1-01 locomotion proof).
 fn playtest_track_movement(
     config: Res<PlaytestConfig>,
     mut state: ResMut<PlaytestState>,
     movement: Query<&aa_physics::CharacterMovement>,
 ) {
-    if config.scenario != "locomotion_smoke" {
+    if config.scenario != "locomotion_smoke" && config.scenario != "death_respawn" {
         return;
     }
     if movement.iter().any(|m| m.wish_dir.length_squared() > 0.01) {
@@ -297,20 +377,26 @@ fn playtest_track_movement(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn playtest_step(
     mut app_exit: MessageWriter<AppExit>,
     config: Res<PlaytestConfig>,
     mut state: ResMut<PlaytestState>,
     mut damage_events: MessageReader<aa_ability::DamageAppliedEvent>,
     mut dummies: Query<(Entity, &mut aa_ability::AttributeSet), With<aa_gameplay::TrainingDummy>>,
+    players: Query<Entity, With<aa_gameplay::PlayerState>>,
     origin: Res<PawnOrigin>,
     pawns: Query<&Transform, With<aa_gameplay::Pawn>>,
 ) {
     let dummy_entities: Vec<Entity> = dummies.iter().map(|(entity, _)| entity).collect();
+    let player_entities: Vec<Entity> = players.iter().collect();
 
     for event in damage_events.read() {
         if dummy_entities.contains(&event.target) {
             state.dummy_damaged = true;
+        }
+        if player_entities.contains(&event.target) {
+            state.player_died = state.player_died || event.amount > 0.0;
         }
     }
 
@@ -384,7 +470,40 @@ fn playtest_step(
         ];
     }
 
+    if config.scenario == "death_respawn" {
+        let moved = match (state.initial_player_pos, state.final_player_pos) {
+            (Some(start), Some(end)) if start.distance(end) >= 0.5 => true,
+            _ => state.movement_intent_seen || state.move_input_sent,
+        };
+        let health_restored = state
+            .final_player_health
+            .is_some_and(|health| (health - 100.0).abs() <= 0.01);
+        assertions = vec![
+            AssertionResult {
+                name: "player_moved".into(),
+                passed: moved,
+            },
+            AssertionResult {
+                name: "ability_fired".into(),
+                passed: state.ability_fired,
+            },
+            AssertionResult {
+                name: "player_died".into(),
+                passed: state.player_died,
+            },
+            AssertionResult {
+                name: "health_restored".into(),
+                passed: state.player_respawned && health_restored,
+            },
+            AssertionResult {
+                name: "pawn_visible".into(),
+                passed: state.pawn_visible && state.player_respawned,
+            },
+        ];
+    }
+
     let ok = assertions.iter().all(|a| a.passed);
+
     let report = PlaytestReport {
         ok,
         scenario: config.scenario.clone(),

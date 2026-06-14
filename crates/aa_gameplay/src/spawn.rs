@@ -26,9 +26,15 @@ pub fn spawn_training_dummy(
         let handle: Handle<aa_ability::AttributeSetAsset> =
             asset_server.load("attributes/hero_combat.ron");
 
+        let mut combat = DummyCombat::default();
+        if std::env::var("AA_PLAYTEST_SCENARIO").ok().as_deref() == Some("death_respawn") {
+            combat.range = 10.0;
+            combat.cooldown_secs = 0.5;
+        }
+
         commands.spawn((
             TrainingDummy,
-            DummyCombat::default(),
+            combat,
             AttributeSet::default(),
             ActiveEffects::default(),
             GameplayTags::default(),

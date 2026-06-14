@@ -1,0 +1,41 @@
+(
+    schema_version: 1,
+    id: "death_respawn",
+    display_name: "Death Respawn Loop",
+    description: "P1-10 gate: move toward dummy, fire, die to melee, respawn with restored health.",
+    seed: 11,
+    duration_secs: 38.0,
+    assertions: [
+        (
+            name: "player_moved",
+            check: (
+                PlayerMoved: 0.5,
+            ),
+        ),
+        (
+            name: "ability_fired",
+            check: (
+                AbilityFired: true,
+            ),
+        ),
+        (
+            name: "player_died",
+            check: (
+                PlayerDied: true,
+            ),
+        ),
+        (
+            name: "health_restored",
+            check: (
+                HealthRestored: 100.0,
+            ),
+        ),
+        (
+            name: "pawn_visible",
+            check: (
+                PawnVisible: true,
+            ),
+        ),
+    ],
+    artifacts: ["log"],
+)

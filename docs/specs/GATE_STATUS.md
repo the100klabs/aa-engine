@@ -14,11 +14,11 @@
 | `aa.project.toml` | Present at repo root and per example project |
 | `config/*.toml` | Present at repo root and example projects |
 | `crates/aa_*` | core, assets, scene, tags, input, ability, experience, gameplay, physics, animation, net (scaffold), **world_stream**, cli |
-| `examples/demo_game` | Playable Phase 1 combat + `smoke`, `fireball_hit`, `locomotion_smoke` playtests |
+| `examples/demo_game` | Playable Phase 1 combat + `smoke`, `fireball_hit`, `locomotion_smoke`, `death_respawn` playtests |
 | `examples/open_world_studio` | 256-sector (16×16 @ 256m) streamed world, 8 data layers, headless OWS playtests |
 | Rust validate | `validate examples/open_world_studio --format json` passes (`diagnostics` schema) |
 | Rust validate SARIF | `validate examples/demo_game --format sarif` emits SARIF 2.1 |
-| Rust playtest | `smoke`, `fireball_hit`, `locomotion_smoke` pass on demo_game |
+| Rust playtest | `smoke`, `fireball_hit`, `locomotion_smoke`, `death_respawn` pass on demo_game |
 | OWS playtest | `open_world_enemy_camp` + `open_world_sector_traverse` pass (`sector_0_0=Active`, real spawn pipeline) |
 | P1 unit tests | `cargo test -p aa_ability --test p1_gates` (3/3) |
 | P1 integration | `cargo test -p aa_experience --test p1_gates` (P1-06), `cargo test -p aa_gameplay --test p1_gates` (P1-07) |
@@ -52,8 +52,9 @@
 | P1-07 | PASS | `cargo test -p aa_gameplay --test p1_gates` — attribute set + input context + `PendingInit` cleared |
 | P1-08 | PASS | `cargo test -p aa_ability --test p1_gates data_driven_abilities_ron_only_audit` (4 RON abilities) |
 | P1-09 | PASS | `bench_100_asc` criterion bench in `aa_ability` |
+| P1-10 | PASS | `death_respawn` playtest — move, fire, die to dummy melee, respawn with Health=100 |
 
-**GATE: FAIL** (P1-10 human play loop still open)
+**GATE: PASS**
 
 ## Gate OWA - Open World Alpha
 
@@ -85,7 +86,7 @@
 |----|--------|----------|
 | P3-01 | PASS | Rust `aa validate` JSON |
 | P3-02 | PASS | Rust `aa validate --format sarif` |
-| P3-03 | PASS | Runtime playtest CI (`smoke`, `fireball_hit`, `locomotion_smoke`, OWS) |
+| P3-03 | PASS | Runtime playtest CI (`smoke`, `fireball_hit`, `locomotion_smoke`, `death_respawn`, OWS) |
 | P3-04 | PASS | Rust `aa index --query` |
 | P3-05 | PASS | Rust `aa eval list/run` with acceptance parity |
 
