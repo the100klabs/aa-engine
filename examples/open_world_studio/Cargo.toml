@@ -1,10 +1,17 @@
 [package]
 name = "open_world_studio"
-version = "0.1.0"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
 publish = false
 
-[workspace]
+[dependencies]
+aa_core = { path = "../../crates/aa_core" }
+aa_world_stream = { path = "../../crates/aa_world_stream" }
+bevy = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
 
 [lints.rust]
 unsafe_code = "deny"

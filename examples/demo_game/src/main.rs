@@ -62,18 +62,17 @@ fn main() {
         )
         .add_systems(
             PreUpdate,
-            route_ability_input.in_set(AaSchedule::AbilityInput),
-        )
-        .add_systems(
-            Update,
             (
                 update_aim,
                 apply_pawn_facing,
                 sync_pawn_origin,
-                camera_follow,
-                attach_visuals,
-                update_hud,
-            ),
+                route_ability_input.in_set(AaSchedule::AbilityInput),
+            )
+                .chain(),
+        )
+        .add_systems(
+            Update,
+            (camera_follow, attach_visuals, update_hud),
         )
         .add_systems(
             FixedUpdate,

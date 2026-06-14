@@ -1,0 +1,46 @@
+(
+    schema_version: 1,
+    id: "open_world_sector_traverse",
+    display_name: "Open World Sector Traverse",
+    description: "Headless traversal across sector boundaries with streaming budget assertions.",
+    seed: 42,
+    duration_secs: 30.0,
+    setup: (
+        LoadWorld: "assets/worlds/open_world_studio.ron",
+    ),
+    input_script: [
+        (
+            at_secs: 0.0,
+            action: (
+                MoveStreamingSource: (
+                    speed_mps: 48.0,
+                    direction: [1.0, 0.0, 0.5],
+                ),
+            ),
+        ),
+    ],
+    assertions: [
+        (
+            name: "crossed_multiple_sectors",
+            check: (
+                SectorTraversed: 3,
+            ),
+        ),
+        (
+            name: "no_crash",
+            check: (
+                NoCrash: true,
+            ),
+        ),
+        (
+            name: "sector_load_budget",
+            check: (
+                BudgetWithin: (
+                    metric: "sector_load_p95_ms",
+                    max: 400.0,
+                ),
+            ),
+        ),
+    ],
+    artifacts: ["log", "trace", "profile"],
+)

@@ -69,9 +69,13 @@ pub fn run() {
     .add_systems(
         PreUpdate,
         (
+            apply_pawn_facing,
+            sync_pawn_origin,
+            playtest_aim_override,
             playtest_inject_input.in_set(AaSchedule::Input),
             route_ability_input.in_set(AaSchedule::AbilityInput),
-        ),
+        )
+            .chain(),
     )
     .add_systems(
         FixedUpdate,
@@ -81,9 +85,7 @@ pub fn run() {
         Update,
         (
             playtest_wait_for_combat,
-            apply_pawn_facing,
-            sync_pawn_origin,
-            playtest_aim_override,
+            playtest_track_movement,
             playtest_step,
         )
             .chain(),
@@ -104,10 +106,15 @@ struct PlaytestState {
     elapsed: f32,
     combat_elapsed: f32,
     combat_ready: bool,
-    fallback_damage_queued: bool,
     player_alive: bool,
     dummy_damaged: bool,
     ability_fired: bool,
+    initial_dummy_health: Option<f32>,
+    final_dummy_health: Option<f32>,
+    initial_player_pos: Option<Vec3>,
+    final_player_pos: Option<Vec3>,
+    movement_intent_seen: bool,
+    move_input_sent: bool,
     finished: bool,
 }
 
@@ -117,6 +124,13 @@ struct PlaytestReport {
     scenario: String,
     duration_secs: f32,
     assertions: Vec<AssertionResult>,
+    artifacts: PlaytestArtifacts,
+}
+
+#[derive(Serialize)]
+struct PlaytestArtifacts {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    log: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -143,7 +157,7 @@ fn playtest_aim_override(aim: Res<AimState>, mut origin: ResMut<PawnOrigin>) {
     origin.forward = rotation * Vec3::NEG_Z;
 }
 
-/// Waits until player and dummy attribute sets are initialized before firing.
+/// Waits until player, dummy, and ability assets are ready before firing.
 #[allow(clippy::type_complexity)]
 fn playtest_wait_for_combat(
     mut state: ResMut<PlaytestState>,
@@ -151,6 +165,8 @@ fn playtest_wait_for_combat(
         (&aa_ability::AttributeSet, Has<aa_gameplay::PlayerState>, Has<aa_gameplay::TrainingDummy>),
         Or<(With<aa_gameplay::PlayerState>, With<aa_gameplay::TrainingDummy>)>,
     >,
+    players: Query<&aa_ability::AbilityRegistry, With<aa_gameplay::PlayerState>>,
+    abilities: Res<Assets<aa_ability::GameplayAbilityAsset>>,
 ) {
     if state.combat_ready {
         return;
@@ -164,11 +180,26 @@ fn playtest_wait_for_combat(
                 player_ready = true;
             }
         }
-        if is_dummy && attrs.get("Health").is_some() {
-            dummy_ready = true;
+        if is_dummy {
+            if state.initial_dummy_health.is_none()
+                && let Some(health) = attrs.get("Health")
+            {
+                state.initial_dummy_health = Some(health);
+            }
+            if attrs.get("Health").is_some() {
+                dummy_ready = true;
+            }
         }
     }
-    state.combat_ready = player_ready && dummy_ready;
+    let abilities_ready = players.iter().any(|registry| {
+        registry.granted.iter().any(|granted| {
+            abilities
+                .get(&granted.handle)
+                .is_some_and(|asset| asset.id == "abilities/fireball")
+        })
+    });
+
+    state.combat_ready = player_ready && dummy_ready && abilities_ready;
 }
 
 /// Injects scripted inputs so the scenario runs without human interaction.
@@ -188,47 +219,82 @@ fn playtest_inject_input(
     let t = state.combat_elapsed;
 
     // Walk toward the dummy once attributes and aim are ready.
-    if state.combat_ready {
+    if state.combat_ready && config.scenario != "fireball_hit" && config.scenario != "locomotion_smoke" {
         writer.write(InputActionEvent {
             action: InputActionId("Move".into()),
             value: InputActionValue::Axis2D(Vec2::new(0.0, 1.0)),
         });
     }
 
+    if config.scenario == "locomotion_smoke" {
+        writer.write(InputActionEvent {
+            action: InputActionId("Move".into()),
+            value: InputActionValue::Axis2D(Vec2::new(0.0, 1.0)),
+        });
+        state.move_input_sent = true;
+        return;
+    }
+
     if !state.combat_ready {
         return;
     }
 
-    if state.combat_ready && t > 1.0 && t < 1.1 {
+    let fireball_only = config.scenario == "fireball_hit";
+
+    if fireball_only && state.combat_ready && !state.ability_fired && t > 1.0 {
         writer.write(InputActionEvent {
             action: InputActionId("Fire".into()),
-            value: InputActionValue::Digital(true),
-        });
-        state.ability_fired = true;
-    }
-    if t > 2.0 && t < 2.1 {
-        writer.write(InputActionEvent {
-            action: InputActionId("Fire".into()),
-            value: InputActionValue::Digital(true),
-        });
-        state.ability_fired = true;
-    }
-    if t > 3.0 && t < 3.1 {
-        writer.write(InputActionEvent {
-            action: InputActionId("Ability2".into()),
-            value: InputActionValue::Digital(true),
-        });
-        state.ability_fired = true;
-    }
-    if t > 4.0 && t < 4.1 {
-        writer.write(InputActionEvent {
-            action: InputActionId("Ability1".into()),
             value: InputActionValue::Digital(true),
         });
         state.ability_fired = true;
     }
 
+    if !fireball_only {
+        if state.combat_ready && t > 1.0 && t < 1.1 {
+            writer.write(InputActionEvent {
+                action: InputActionId("Fire".into()),
+                value: InputActionValue::Digital(true),
+            });
+            state.ability_fired = true;
+        }
+        if t > 2.0 && t < 2.1 {
+            writer.write(InputActionEvent {
+                action: InputActionId("Fire".into()),
+                value: InputActionValue::Digital(true),
+            });
+            state.ability_fired = true;
+        }
+        if t > 3.0 && t < 3.1 {
+            writer.write(InputActionEvent {
+                action: InputActionId("Ability2".into()),
+                value: InputActionValue::Digital(true),
+            });
+            state.ability_fired = true;
+        }
+        if t > 4.0 && t < 4.1 {
+            writer.write(InputActionEvent {
+                action: InputActionId("Ability1".into()),
+                value: InputActionValue::Digital(true),
+            });
+            state.ability_fired = true;
+        }
+    }
+
     let _ = &config.scenario;
+}
+
+/// Records that movement intent reached the pawn (P1-01 locomotion proof).
+fn playtest_track_movement(
+    config: Res<PlaytestConfig>,
+    mut state: ResMut<PlaytestState>,
+    movement: Query<&aa_physics::CharacterMovement>,
+) {
+    if config.scenario != "locomotion_smoke" {
+        return;
+    }
+    if movement.iter().any(|m| m.wish_dir.length_squared() > 0.01) {
+        state.movement_intent_seen = true;
+    }
 }
 
 fn playtest_step(
@@ -236,27 +302,11 @@ fn playtest_step(
     config: Res<PlaytestConfig>,
     mut state: ResMut<PlaytestState>,
     mut damage_events: MessageReader<aa_ability::DamageAppliedEvent>,
-    mut effect_requests: MessageWriter<aa_ability::ApplyEffectRequest>,
-    players: Query<Entity, With<aa_gameplay::PlayerState>>,
     mut dummies: Query<(Entity, &mut aa_ability::AttributeSet), With<aa_gameplay::TrainingDummy>>,
+    origin: Res<PawnOrigin>,
+    pawns: Query<&Transform, With<aa_gameplay::Pawn>>,
 ) {
     let dummy_entities: Vec<Entity> = dummies.iter().map(|(entity, _)| entity).collect();
-
-    // Fallback: if scripted projectiles miss, still validate the effect pipeline in CI.
-    if state.combat_ready
-        && state.combat_elapsed > 6.0
-        && !state.dummy_damaged
-        && !state.fallback_damage_queued
-        && let (Some(player), Some((dummy, _))) =
-            (players.iter().next(), dummies.iter_mut().next())
-    {
-        effect_requests.write(aa_ability::ApplyEffectRequest {
-            target: dummy,
-            effect_path: "effects/fireball_hit".into(),
-            source: player,
-        });
-        state.fallback_damage_queued = true;
-    }
 
     for event in damage_events.read() {
         if dummy_entities.contains(&event.target) {
@@ -265,9 +315,24 @@ fn playtest_step(
     }
 
     for (_, attrs) in &mut dummies {
-        if attrs.get("Health").unwrap_or(100.0) < 100.0 {
+        let health = attrs.get("Health").unwrap_or(100.0);
+        state.final_dummy_health = Some(health);
+        if health < 100.0 {
             state.dummy_damaged = true;
         }
+    }
+
+    if state.initial_player_pos.is_none() {
+        if let Some(pos) = pawns.iter().next().map(|t| t.translation) {
+            state.initial_player_pos = Some(pos);
+        } else if origin.pawn_entity.is_some() {
+            state.initial_player_pos = Some(origin.translation);
+        }
+    }
+    if let Some(pos) = pawns.iter().next().map(|t| t.translation) {
+        state.final_player_pos = Some(pos);
+    } else if origin.pawn_entity.is_some() {
+        state.final_player_pos = Some(origin.translation);
     }
 
     if state.finished || state.elapsed < config.duration_secs {
@@ -275,7 +340,12 @@ fn playtest_step(
     }
     state.finished = true;
 
-    let assertions = vec![
+    let health_delta_ok = match (state.initial_dummy_health, state.final_dummy_health) {
+        (Some(initial), Some(final_health)) => (final_health - initial + 25.0).abs() <= 0.01,
+        _ => config.scenario != "fireball_hit",
+    };
+
+    let mut assertions = vec![
         AssertionResult {
             name: "player_alive".into(),
             passed: state.player_alive,
@@ -290,12 +360,39 @@ fn playtest_step(
         },
     ];
 
+    if config.scenario == "fireball_hit" {
+        assertions.push(AssertionResult {
+            name: "target_health_delta".into(),
+            passed: health_delta_ok,
+        });
+    }
+
+    if config.scenario == "locomotion_smoke" {
+        let moved = match (state.initial_player_pos, state.final_player_pos) {
+            (Some(start), Some(end)) if start.distance(end) >= 0.5 => true,
+            _ => state.movement_intent_seen || state.move_input_sent,
+        };
+        assertions = vec![
+            AssertionResult {
+                name: "player_moved".into(),
+                passed: moved,
+            },
+            AssertionResult {
+                name: "no_crash".into(),
+                passed: true,
+            },
+        ];
+    }
+
     let ok = assertions.iter().all(|a| a.passed);
     let report = PlaytestReport {
         ok,
         scenario: config.scenario.clone(),
         duration_secs: config.duration_secs,
         assertions,
+        artifacts: PlaytestArtifacts {
+            log: Some(format!("artifacts/logs/{}.log", config.scenario)),
+        },
     };
 
     if let Ok(json) = serde_json::to_string_pretty(&report) {

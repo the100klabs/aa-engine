@@ -1,3 +1,4 @@
+use aa_ability::execute_ability_impls;
 use aa_core::AaSchedule;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
@@ -21,6 +22,12 @@ impl Plugin for AaPhysicsPlugin {
                     apply_dash_bursts.in_set(AaSchedule::Physics),
                     tick_projectiles.in_set(AaSchedule::Physics),
                 ),
+            )
+            .add_systems(
+                PostUpdate,
+                tick_projectiles
+                    .after(execute_ability_impls)
+                    .in_set(AaSchedule::Physics),
             )
             .add_systems(
                 Update,

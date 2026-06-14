@@ -13,8 +13,10 @@ members = [
     "crates/aa_physics",
     "crates/aa_animation",
     "crates/aa_net",
+    "crates/aa_world_stream",
     "crates/aa_cli",
     "examples/demo_game",
+    "examples/open_world_studio",
 ]
 default-members = ["examples/demo_game"]
 

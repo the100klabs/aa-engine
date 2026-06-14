@@ -1,0 +1,23 @@
+(
+    schema_version: 1,
+    id: "locomotion_smoke",
+    display_name: "Locomotion Smoke",
+    description: "Verifies player pawn movement intent in headless playtest.",
+    seed: 7,
+    duration_secs: 8.0,
+    assertions: [
+        (
+            name: "player_moved",
+            check: (
+                PlayerMoved: 0.5,
+            ),
+        ),
+        (
+            name: "no_crash",
+            check: (
+                NoCrash: true,
+            ),
+        ),
+    ],
+    artifacts: ["log"],
+)

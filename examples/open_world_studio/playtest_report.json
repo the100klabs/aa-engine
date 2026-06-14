@@ -1,0 +1,36 @@
+{
+  "ok": true,
+  "scenario": "open_world_enemy_camp",
+  "duration_secs": 8.001439,
+  "assertions": [
+    {
+      "name": "no_crash",
+      "passed": true
+    },
+    {
+      "name": "sector_0_0_active",
+      "passed": true
+    },
+    {
+      "name": "camp_guard_spawned",
+      "passed": true
+    },
+    {
+      "name": "sector_load_budget",
+      "passed": true
+    },
+    {
+      "name": "sector_crossing_hitch_budget",
+      "passed": true
+    }
+  ],
+  "artifacts": {
+    "log": "artifacts/logs/open_world_enemy_camp.log",
+    "trace": "artifacts/profiles/open_world_enemy_camp.trace",
+    "profile": "artifacts/profiles/open_world_enemy_camp.profile.json"
+  },
+  "profile": {
+    "sector_load_p95_ms": 0.0,
+    "sector_crossing_hitch_ms": 3.624625
+  }
+}

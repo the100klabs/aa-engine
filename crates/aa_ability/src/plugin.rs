@@ -43,6 +43,9 @@ impl Plugin for AaAbilityPlugin {
                         .in_set(AaSchedule::Effects),
                 ),
             )
-            .add_systems(PostUpdate, execute_ability_impls);
+            .add_systems(
+                PostUpdate,
+                execute_ability_impls.in_set(AaSchedule::AbilityFixed),
+            );
     }
 }

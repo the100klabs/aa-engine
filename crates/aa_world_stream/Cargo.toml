@@ -1,0 +1,20 @@
+[package]
+name = "aa_world_stream"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "AA Engine world partitioning, sector streaming, and open-world inspection"
+
+[dependencies]
+aa_core = { path = "../aa_core" }
+aa_scene = { path = "../aa_scene" }
+bevy = { workspace = true }
+ron = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = "0.10"
+thiserror = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }

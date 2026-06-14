@@ -10,6 +10,7 @@ name = "aa"
 path = "src/main.rs"
 
 [dependencies]
+aa_world_stream = { path = "../aa_world_stream" }
 clap = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

@@ -16,8 +16,22 @@ jobs:
         run: cargo clippy --workspace -- -D warnings
       - name: Validate demo_game
         run: cargo run -p aa_cli -- validate examples/demo_game --format json
+      - name: P1 ability unit tests
+        run: cargo test -p aa_ability --test p1_gates
+      - name: World stream unit tests
+        run: cargo test -p aa_world_stream
       - name: Playtest smoke scenario
         run: cargo run -p aa_cli -- playtest --project examples/demo_game --scenario smoke --duration 12
+      - name: Playtest fireball_hit scenario
+        run: cargo run -p aa_cli -- playtest --project examples/demo_game --scenario fireball_hit --duration 12
+      - name: Playtest locomotion_smoke scenario
+        run: cargo run -p aa_cli -- playtest --project examples/demo_game --scenario locomotion_smoke --duration 10
+      - name: World inspect open_world_studio
+        run: cargo run -p aa_cli -- world inspect --project examples/open_world_studio --world open_world_studio --json
+      - name: World cook open_world_studio
+        run: cargo run -p aa_cli -- world cook --project examples/open_world_studio --world open_world_studio --verify --json
+      - name: Playtest open_world_enemy_camp
+        run: cargo run -p aa_cli -- playtest --project examples/open_world_studio --scenario open_world_enemy_camp --duration 25 --json
 
   bootstrap:
     runs-on: ubuntu-latest

@@ -1,4 +1,9 @@
 pub mod check;
+pub mod eval;
+pub mod index;
 pub mod playtest;
+pub mod profile;
 pub mod run;
+pub mod scene;
 pub mod validate;
+pub mod world;

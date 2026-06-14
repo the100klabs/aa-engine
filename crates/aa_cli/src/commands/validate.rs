@@ -31,7 +31,7 @@ struct ValidateReport {
 }
 
 /// Validate project assets and configuration.
-pub fn run(path: &Path, json: bool) -> ExitCode {
+pub fn run(path: &Path, json: bool, sarif: bool) -> ExitCode {
     let started = Instant::now();
     let project_root = match project::resolve_project_root(path) {
         Ok(root) => root,
@@ -43,7 +43,7 @@ pub fn run(path: &Path, json: bool) -> ExitCode {
                 line: None,
                 column: None,
             };
-            return finish(vec![err], 0, started, json, None);
+            return finish(vec![err], 0, started, json, sarif, None);
         }
         Err(e) => {
             eprintln!("error: {e}");
@@ -60,7 +60,7 @@ pub fn run(path: &Path, json: bool) -> ExitCode {
         Ok(m) => m,
         Err(e) => {
             errors.push(validation_error("MANIFEST_PARSE", e.to_string(), project::manifest_path(&project_root)));
-            return finish(errors, warnings, started, json, None);
+            return finish(errors, warnings, started, json, sarif, None);
         }
     };
 
@@ -101,7 +101,7 @@ pub fn run(path: &Path, json: bool) -> ExitCode {
             format!("assets root not found: {}", manifest.engine.assets_root),
             assets_root,
         ));
-        return finish(errors, warnings, started, json, None);
+        return finish(errors, warnings, started, json, sarif, None);
     }
 
     let mut prefab_ids: HashMap<String, PathBuf> = HashMap::new();
@@ -178,6 +178,7 @@ pub fn run(path: &Path, json: bool) -> ExitCode {
         warnings,
         started,
         json,
+        sarif,
         Some((manifest.name.clone(), manifest.version.clone())),
     )
 }
@@ -341,6 +342,7 @@ fn finish(
     warning_count: usize,
     started: Instant,
     json: bool,
+    sarif: bool,
     project: Option<(String, String)>,
 ) -> ExitCode {
     let ok = errors.is_empty();
@@ -354,11 +356,13 @@ fn finish(
         project_version,
         error_count: errors.len(),
         warning_count,
-        errors,
+        errors: errors.clone(),
         duration_ms: started.elapsed().as_millis() as u64,
     };
 
-    if json {
+    if sarif {
+        println!("{}", serde_json::to_string_pretty(&validation_to_sarif(&report)).unwrap_or_default());
+    } else if json {
         if let Ok(text) = serde_json::to_string_pretty(&report) {
             println!("{text}");
         }
@@ -382,4 +386,32 @@ fn finish(
     } else {
         ExitCode::ValidationFailed
     }
+}
+
+fn validation_to_sarif(report: &ValidateReport) -> serde_json::Value {
+    let results: Vec<serde_json::Value> = report
+        .errors
+        .iter()
+        .map(|err| {
+            serde_json::json!({
+                "ruleId": err.code,
+                "level": "error",
+                "message": { "text": err.message },
+                "locations": [{
+                    "physicalLocation": {
+                        "artifactLocation": { "uri": err.path },
+                        "region": err.line.map(|line| serde_json::json!({ "startLine": line }))
+                    }
+                }]
+            })
+        })
+        .collect();
+    serde_json::json!({
+        "version": "2.1.0",
+        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+        "runs": [{
+            "tool": { "driver": { "name": "aa_cli", "version": "0.1.0" } },
+            "results": results,
+        }]
+    })
 }

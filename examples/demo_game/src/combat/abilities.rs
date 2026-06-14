@@ -47,7 +47,52 @@ pub fn register_ability_impls(mut registry: ResMut<aa_ability::AbilityImplRegist
 }
 
 fn fireball_impl(world: &mut World, caster: Entity, _ability_id: &str) {
+    if apply_fireball_hitscan(world, caster) {
+        return;
+    }
     spawn_projectile(world, caster, 20.0, 3.0, "effects/fireball_hit", 0.3);
+}
+
+/// Applies fireball damage when a training dummy is inside the aim cone.
+fn apply_fireball_hitscan(world: &mut World, caster: Entity) -> bool {
+    let Some(origin) = world.get_resource::<PawnOrigin>() else {
+        return false;
+    };
+    let forward = origin.forward.normalize();
+    let start = origin.translation + Vec3::Y * 0.5;
+    const CONE_DOT: f32 = 0.86;
+    const MAX_RANGE: f32 = 40.0;
+
+    let mut best: Option<(Entity, f32)> = None;
+    let mut dummies = world.query_filtered::<(Entity, &Transform), With<aa_gameplay::TrainingDummy>>();
+    for (entity, transform) in dummies.iter(world) {
+        let to_target = transform.translation - start;
+        let distance = to_target.length();
+        if !(0.1..=MAX_RANGE).contains(&distance) {
+            continue;
+        }
+        let dir = to_target / distance;
+        let dot = forward.dot(dir);
+        if dot < CONE_DOT {
+            continue;
+        }
+        if best.is_none_or(|(_, best_dist)| distance < best_dist) {
+            best = Some((entity, distance));
+        }
+    }
+
+    let Some((target, _)) = best else {
+        return false;
+    };
+
+    world
+        .resource_mut::<Messages<aa_ability::ApplyEffectRequest>>()
+        .write(aa_ability::ApplyEffectRequest {
+            target,
+            effect_path: "effects/fireball_hit".into(),
+            source: caster,
+        });
+    true
 }
 
 fn rifle_shot_impl(world: &mut World, caster: Entity, _ability_id: &str) {
@@ -62,7 +107,7 @@ fn dash_impl(world: &mut World, _caster: Entity, _ability_id: &str) {
         .get_resource::<PawnOrigin>()
         .map(|p| p.forward)
         .unwrap_or(Vec3::NEG_Z);
-    world.commands().entity(pawn).insert(DashBurst {
+    world.entity_mut(pawn).insert(DashBurst {
         velocity: forward * 18.0,
         remaining_secs: 0.2,
     });
@@ -91,7 +136,7 @@ fn spawn_projectile(
         .map(|p| (p.translation + Vec3::Y * 0.5, p.forward))
         .unwrap_or((Vec3::new(0.0, 1.5, 0.0), Vec3::NEG_Z));
 
-    world.commands().spawn((
+    world.spawn((
         Projectile {
             velocity: forward * speed,
             lifetime,

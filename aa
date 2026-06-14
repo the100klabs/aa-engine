@@ -1,22 +1,16 @@
-#!/usr/bin/env python3
-"""Project-local AA bootstrap shim.
+#!/usr/bin/env bash
+set -euo pipefail
 
-This keeps AA Engine commands explicit as `./aa ...` until the Rust `aa_cli`
-crate is approved and installed as the real `aa` executable.
-"""
+REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+RUST_COMMANDS="check validate index playtest world scene eval profile"
 
-from __future__ import annotations
+if [[ $# -lt 1 ]]; then
+  exec python3 "$REPO_ROOT/docs/specs/tools/aa_bootstrap.py"
+fi
 
-import os
-import sys
-from pathlib import Path
+cmd="$1"
+if [[ " $RUST_COMMANDS " == *" $cmd "* ]]; then
+  exec cargo run -p aa_cli --quiet -- "$@"
+fi
 
-
-def main() -> None:
-    repo_root = Path(__file__).resolve().parent
-    bootstrap = repo_root / "docs/specs/tools/aa_bootstrap.py"
-    os.execv(sys.executable, [sys.executable, str(bootstrap), *sys.argv[1:]])
-
-
-if __name__ == "__main__":
-    main()
+exec python3 "$REPO_ROOT/docs/specs/tools/aa_bootstrap.py" "$@"

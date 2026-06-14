@@ -12,3 +12,10 @@ bevy = { workspace = true }
 ron = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "bench_100_asc"
+harness = false

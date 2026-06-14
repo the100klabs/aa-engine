@@ -12,9 +12,11 @@ mod plugin;
 mod registry;
 
 pub use ability::{AbilityImplFn, AbilityImplRegistry};
+pub use activate::execute_ability_impls;
 pub use apply::apply_gameplay_effect;
 pub use assets::{
-    AttributeSetAsset, EffectDuration, GameplayAbilityAsset, GameplayEffectAsset, ModifierOp,
+    AttributeSetAsset, EffectDuration, EffectModifier, GameplayAbilityAsset, GameplayEffectAsset,
+    ModifierOp,
 };
 pub use attribute::AttributeSet;
 pub use components::{AbilityRegistry, ActiveEffects};

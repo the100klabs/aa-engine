@@ -1,0 +1,12 @@
+PlaytestScenario(
+    schema_version: 1,
+    id: "fireball_hit",
+    display_name: "Fireball Hit",
+    duration_secs: 12.0,
+    assertions: [
+        "player_alive",
+        "dummy_damaged",
+        "ability_fired",
+        "target_health_delta",
+    ],
+)

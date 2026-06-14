@@ -1,30 +1,25 @@
-(
+SectorDescriptor(
     schema_version: 1,
     id: "sector_0_0",
-    coord: [0, 0],
-    bounds: (
-        min: [-128.0, 0.0, -128.0],
-        max: [128.0, 96.0, 128.0],
-    ),
-    data_layers: ["terrain", "gameplay", "encounters"],
+    coord: (0, 0),
+    bounds: (min: (0.0, 0.0, 0.0), max: (256.0, 256.0, 256.0)),
+    data_layers: ["terrain", "gameplay", "encounters", "foliage", "audio", "vfx", "nav", "lighting"],
     entities: [
         (
             prefab: "assets/prefabs/camp_fire.ron",
             transform: (
-                translation: [32.0, 0.0, -18.0],
+                translation: (32.0, 0.0, -18.0),
                 rotation_y_degrees: 0.0,
-                scale: [1.0, 1.0, 1.0],
+                scale: (1.0, 1.0, 1.0),
             ),
         ),
         (
             prefab: "assets/spawn_tables/enemy_camp_sector_0_0.ron",
             transform: (
-                translation: [28.0, 0.0, -20.0],
+                translation: (28.0, 0.0, -20.0),
                 rotation_y_degrees: 45.0,
-                scale: [1.0, 1.0, 1.0],
+                scale: (1.0, 1.0, 1.0),
             ),
         ),
     ],
-    navmesh: "assets/nav/sector_0_0.navmesh",
-    hlod: null,
 )

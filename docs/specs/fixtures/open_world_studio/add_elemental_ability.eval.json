@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "id": "open_world_studio_elemental_ability",
+  "display_name": "Open World Studio Elemental Ability",
+  "description": "Eval stub for adding a basic elemental ability to open_world_studio.",
+  "tier": "open_world_alpha",
+  "min_pass_rate": 1.0,
+  "max_repair_attempts": 1,
+  "tasks": [
+    {
+      "id": "EVAL-OWA-ELEMENTAL-001",
+      "prompt": "Add a basic elemental ranged ability to open_world_studio and prove it via playtest.",
+      "category": "ability",
+      "project": "examples/open_world_studio",
+      "max_repair_attempts": 1,
+      "required_commands": [
+        "aa index",
+        "aa validate",
+        "aa playtest"
+      ],
+      "expected_files": [
+        "examples/open_world_studio/assets/abilities/basic_ranged_attack.ron"
+      ],
+      "acceptance": [
+        { "CommandPasses": "aa index" },
+        { "CommandPasses": "aa validate" },
+        { "PlaytestPasses": "open_world_enemy_camp" }
+      ]
+    }
+  ]
+}

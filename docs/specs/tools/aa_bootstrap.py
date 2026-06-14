@@ -102,24 +102,53 @@ class RonSubsetParser:
             raise ValidationError("Unexpected end of RON")
         char = self.text[self.index]
         if char == "(":
-            return self.parse_object()
+            return self.parse_group()
         if char == "[":
             return self.parse_array()
         if char == '"':
             return self.parse_string()
         if char == "-" or char.isdigit():
             return self.parse_number()
-        ident = self.parse_identifier()
-        if ident == "true":
-            return True
-        if ident == "false":
-            return False
-        if ident == "null":
-            return None
-        raise ValidationError(f"Unsupported bare identifier '{ident}' at byte {self.index}")
+        if char.isalpha() or char == "_":
+            ident = self.parse_identifier()
+            self.skip_ws()
+            if self.peek() == "(":
+                return self.parse_group()
+            if ident == "true":
+                return True
+            if ident == "false":
+                return False
+            if ident == "null":
+                return None
+            return ident
+        raise ValidationError(f"Unsupported token '{char}' at byte {self.index}")
+
+    def parse_group(self) -> Any:
+        self.expect("(")
+        self.skip_ws()
+        if self.peek() == ")":
+            self.index += 1
+            return {}
+        if self._looks_like_object_entry():
+            return self.parse_object_body()
+        return self.parse_tuple_body()
+
+    def _looks_like_object_entry(self) -> bool:
+        snapshot = self.index
+        try:
+            self.parse_key()
+            self.skip_ws()
+            is_object = self.peek() == ":"
+        except ValidationError:
+            is_object = False
+        self.index = snapshot
+        return is_object
 
     def parse_object(self) -> dict[str, Any]:
         self.expect("(")
+        return self.parse_object_body()
+
+    def parse_object_body(self) -> dict[str, Any]:
         result: dict[str, Any] = {}
         while True:
             self.skip_ws()
@@ -130,6 +159,18 @@ class RonSubsetParser:
             self.skip_ws()
             self.expect(":")
             result[key] = self.parse_value()
+            self.skip_ws()
+            if self.peek() == ",":
+                self.index += 1
+
+    def parse_tuple_body(self) -> list[Any]:
+        result: list[Any] = []
+        while True:
+            self.skip_ws()
+            if self.peek() == ")":
+                self.index += 1
+                return result
+            result.append(self.parse_value())
             self.skip_ws()
             if self.peek() == ",":
                 self.index += 1

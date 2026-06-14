@@ -45,7 +45,7 @@ pub fn tick_projectiles(
     mut effect_requests: MessageWriter<aa_ability::ApplyEffectRequest>,
 ) {
     let dt = time.delta_secs();
-    let hit_radius = 1.5;
+    let hit_radius = 2.0;
 
     let dummy_positions: Vec<(Entity, Vec3)> = transforms
         .p1()
@@ -54,12 +54,14 @@ pub fn tick_projectiles(
         .collect();
 
     for (entity, mut projectile, mut transform) in transforms.p0().iter_mut() {
-        transform.translation += projectile.velocity * dt;
+        let previous = transform.translation;
+        let next = previous + projectile.velocity * dt;
+        transform.translation = next;
         projectile.lifetime -= dt;
 
         let mut hit_target = None;
         for (dummy, position) in &dummy_positions {
-            if transform.translation.distance(*position) < hit_radius {
+            if segment_intersects_sphere(previous, next, *position, hit_radius) {
                 hit_target = Some(*dummy);
                 break;
             }
@@ -75,6 +77,19 @@ pub fn tick_projectiles(
             commands.entity(entity).despawn();
         }
     }
+}
+
+/// Swept segment test so fast projectiles cannot tunnel through targets between ticks.
+fn segment_intersects_sphere(start: Vec3, end: Vec3, center: Vec3, radius: f32) -> bool {
+    let segment = end - start;
+    let length_sq = segment.length_squared();
+    if length_sq <= f32::EPSILON {
+        return start.distance(center) <= radius;
+    }
+
+    let t = ((center - start).dot(segment) / length_sq).clamp(0.0, 1.0);
+    let closest = start + segment * t;
+    closest.distance(center) <= radius
 }
 
 fn queue_hit_effects(

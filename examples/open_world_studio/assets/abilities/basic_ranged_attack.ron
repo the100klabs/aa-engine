@@ -1,0 +1,11 @@
+(
+    schema_version: 1,
+    id: "basic_ranged_attack",
+    display_name: "Basic Ranged Attack",
+    description: "Starter elemental ranged ability for open world studio playtests.",
+    impl: "basic_ranged_attack",
+    tags: ["Ability.Elemental", "Ability.Ranged"],
+    costs: [],
+    cooldown_secs: 1.5,
+    effects: ["assets/effects/camp_guard_baseline.ron"],
+)
