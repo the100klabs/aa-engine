@@ -11,3 +11,6 @@ bevy = { workspace = true }
 ron = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
+
+[dev-dependencies]
+aa_ability = { path = "../aa_ability" }

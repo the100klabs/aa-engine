@@ -13,3 +13,6 @@ aa_input = { path = "../aa_input" }
 aa_scene = { path = "../aa_scene" }
 aa_tags = { path = "../aa_tags" }
 bevy = { workspace = true }
+
+[dev-dependencies]
+aa_assets = { path = "../aa_assets" }
