@@ -9,7 +9,7 @@
 | Date | 2026-06-14 |
 | Workspace | `aa_engine` (merged runtime + specs) |
 | Repository | https://github.com/the100klabs/aa-engine |
-| Git status | `45d8ac0` — streaming activation, validate parity, 256-sector fixtures, CI expansion |
+| Git status | `bec89f3` — schema validate, P1 integration gates, live world inspect |
 | AA CLI | `./aa` prefers Rust `aa_cli`; bootstrap fallback for remaining commands |
 | `aa.project.toml` | Present at repo root and per example project |
 | `config/*.toml` | Present at repo root and example projects |
@@ -21,6 +21,7 @@
 | Rust playtest | `smoke`, `fireball_hit`, `locomotion_smoke` pass on demo_game |
 | OWS playtest | `open_world_enemy_camp` + `open_world_sector_traverse` pass (`sector_0_0=Active`, real spawn pipeline) |
 | P1 unit tests | `cargo test -p aa_ability --test p1_gates` (3/3) |
+| P1 integration | `cargo test -p aa_experience --test p1_gates` (P1-06), `cargo test -p aa_gameplay --test p1_gates` (P1-07) |
 | World inspect | `aa world inspect` → **256 sectors**, **8 layers** (golden fixtures refreshed) |
 | World cook | `aa world cook --verify --json` deterministic `artifacts/cook/*` |
 | Index / eval / scene | Rust `aa index`, `aa eval run` (29/29 acceptance), `aa scene inspect/patch --dry-run` |
@@ -32,7 +33,7 @@
 |----|--------|----------|
 | P0-01 | PASS | `cargo clippy --workspace -- -D warnings` |
 | P0-02 | PARTIAL | `cargo test -p aa_core --test config_merge_order` (base → project → CLI) |
-| P0-05 | PARTIAL | Rust `aa validate` JSON + SARIF + prefab/asset soft-ref checks |
+| P0-05 | PASS | Rust `aa validate` schema subset (world/sector/spawn_table/ability) + SARIF + prefab refs |
 
 **GATE: FAIL**
 
@@ -45,9 +46,11 @@
 | P1-03 | PASS | `effect_modifies_attribute` unit test |
 | P1-04 | PASS | `asc_on_player_state` unit test |
 | P1-05 | PASS | `stun_blocks_fire` unit test |
+| P1-06 | PASS | `cargo test -p aa_experience --test p1_gates` — `ExperienceReady` + ability grants resolve |
+| P1-07 | PASS | `cargo test -p aa_gameplay --test p1_gates` — attribute set + input context + `PendingInit` cleared |
 | P1-09 | PASS | `bench_100_asc` criterion bench in `aa_ability` |
 
-**GATE: FAIL** (integration gates P1-06–10 still open)
+**GATE: FAIL** (P1-08 data-driven audit, P1-10 human play loop still open)
 
 ## Gate OWA - Open World Alpha
 
@@ -97,6 +100,8 @@ cargo run -p aa_cli -- validate examples/open_world_studio --format json
 cargo run -p aa_cli -- index --query "enemy camp sector" --json
 cargo run -p aa_cli -- eval run open_world_studio_enemy_camp --json
 cargo run -p aa_cli -- eval run open_world_studio_elemental_ability --json
+cargo test -p aa_experience --test p1_gates
+cargo test -p aa_gameplay --test p1_gates
 cargo test -p aa_core --test config_merge_order
 python3 docs/specs/tools/test_bootstrap_cli.py
 ```
