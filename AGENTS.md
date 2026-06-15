@@ -121,3 +121,25 @@ A task is complete when:
 - [ ] Relevant playtest scenario passes
 - [ ] No anti-patterns from doc 16 introduced
 - [ ] Schema changes reflected in `13_data_schemas.md`
+
+## Cursor Cloud specific instructions
+
+Standard commands live in `README.md` and `.github/workflows/ci.yml`; this section only captures non-obvious caveats for this environment.
+
+### Toolchain
+- The workspace is edition 2024 / `rust-version = "1.85.0"` (`Cargo.toml`). The VM base image may ship an older Rust (e.g. 1.83) that **cannot** compile this repo; use `rustup default stable` (≥1.85). The startup update script keeps `cargo` deps fetched.
+- Python tooling (`docs/specs/tools/*.py`, run via `./aa <non-rust-cmd>`) is stdlib-only on Python 3.12 — no pip install needed.
+
+### Running the game / playtests is GPU-gated (key gotcha)
+- `cargo run -p demo_game` and `aa playtest` boot the full Bevy renderer, which **panics with "Unable to find a GPU!"** in this headless VM unless a Vulkan driver is present. The Mesa software driver (lavapipe / `mesa-vulkan-drivers`) is installed in the VM image.
+- You MUST point Vulkan at lavapipe and give it a runtime dir before running any renderer/playtest command:
+  ```bash
+  export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.json
+  export XDG_RUNTIME_DIR=/tmp/xdg && mkdir -p /tmp/xdg
+  ```
+  Without these, the renderer cannot find an adapter. With them, the log shows `AdapterInfo { ... driver: "llvmpipe" ... }` and the app runs (slowly — software rendering).
+- "No audio device found" / ALSA `cannot find card '0'` warnings are expected and harmless (no sound hardware).
+
+### Known pre-existing failures (NOT environment issues)
+- `cargo run -p aa_cli -- validate examples/demo_game` currently exits 1 with `SCHEMA_INVALID: $.cue_on_activate ... got array` on the ability RONs. This also fails CI on `main` (red), so treat it as a pre-existing content/schema mismatch, not a setup problem.
+- Combat playtests (e.g. `smoke`, `fireball_hit`) currently fail their `dummy_damaged` assertion (pre-existing). A clean end-to-end smoke that passes today is `aa playtest --project examples/demo_game --scenario locomotion_smoke --duration 12`.
