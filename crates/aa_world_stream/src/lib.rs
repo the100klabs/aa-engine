@@ -19,6 +19,8 @@ pub use inspect::{inspect_world, LiveStateJson, WorldInspectResult};
 pub use inspect_live::inspect_world_live;
 pub use plugin::AaWorldStreamPlugin;
 pub use profile::{summarize_trace, ProfileSummaryResult, StreamingProfileTrace};
-pub use registry::{SectorDiagnostics, SectorRegistry, SectorRuntimeState};
+pub use registry::{
+    load_sector_descriptor_from_disk, SectorDiagnostics, SectorRegistry, SectorRuntimeState,
+};
 pub use spawn::{load_spawn_table_from_disk, CampGuardAi, SpawnedPawn};
 pub use streaming::{sector_coord_from_position, tick_sector_streaming, StreamingSource, StreamingSourceKind};

@@ -19,3 +19,4 @@ toml = { workspace = true }
 thiserror = { workspace = true }
 walkdir = { workspace = true }
 regex = { workspace = true }
+sha2 = { workspace = true }

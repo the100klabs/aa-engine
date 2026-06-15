@@ -5,14 +5,14 @@
   "description": "Eval fixture for the first Cursor-like studio slice: add a fire ability to demo_game and prove it through validation, check, graph, and playtest commands.",
   "tier": "studio_alpha",
   "min_pass_rate": 1.0,
-  "max_repair_attempts": 3,
+  "max_repair_attempts": 2,
   "tasks": [
     {
       "id": "EVAL-STUDIO-FIRE-ABILITY-001",
       "prompt": "Add a fireball ability to demo_game. Use RON ability/effect/tag assets, keep ability state data-driven, and add a fireball_hit playtest proving target Health changes by -25.",
       "category": "ability",
       "project": "examples/demo_game_contract",
-      "max_repair_attempts": 3,
+      "max_repair_attempts": 2,
       "required_commands": [
         "aa index",
         "aa validate",

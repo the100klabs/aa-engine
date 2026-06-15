@@ -10,6 +10,8 @@ use crate::exit_codes::ExitCode;
 #[derive(Debug, Deserialize)]
 struct EvalSuite {
     id: String,
+    #[serde(default)]
+    max_repair_attempts: u32,
     tasks: Vec<EvalTask>,
 }
 
@@ -27,6 +29,8 @@ struct EvalTask {
     forbidden_paths: Vec<String>,
     #[serde(default)]
     acceptance: Vec<serde_json::Map<String, Value>>,
+    #[serde(default)]
+    max_repair_attempts: u32,
 }
 
 /// List known eval suites.
@@ -100,6 +104,7 @@ pub fn run_eval(eval_id_or_path: &str, json: bool) -> ExitCode {
     };
 
     let mut task_reports = Vec::new();
+    let mut repair_attempts_total = 0u32;
     for task in &suite.tasks {
         let project_root = repo.join(&task.project);
         let mut command_reports = Vec::new();
@@ -115,10 +120,12 @@ pub fn run_eval(eval_id_or_path: &str, json: bool) -> ExitCode {
             evaluate_task_acceptance(task, &project_root, &repo, &command_reports);
         failures.extend(acceptance_failures);
         let passed = failures.is_empty();
+        let task_repairs = task.max_repair_attempts;
+        repair_attempts_total += task_repairs;
         let mut report = serde_json::json!({
             "id": task.id,
             "passed": passed,
-            "repair_attempts": 0,
+            "repair_attempts": task_repairs,
             "commands": command_reports,
             "acceptance": acceptance_checks,
             "artifacts": {},
@@ -136,7 +143,8 @@ pub fn run_eval(eval_id_or_path: &str, json: bool) -> ExitCode {
         "eval_asset": rel_path(&repo, &eval_path),
         "duration_ms": started.elapsed().as_millis(),
         "pass_rate": if task_reports.is_empty() { 0.0 } else { passed_count as f64 / task_reports.len() as f64 },
-        "repair_attempts_total": 0,
+        "max_repair_attempts": suite.max_repair_attempts,
+        "repair_attempts_total": repair_attempts_total,
         "tasks": task_reports,
         "artifacts": {},
     });

@@ -15,6 +15,8 @@ thiserror = { workspace = true }
 
 [dev-dependencies]
 criterion = "0.5"
+aa_core = { path = "../aa_core" }
+tempfile = "3"
 
 [[bench]]
 name = "bench_100_asc"

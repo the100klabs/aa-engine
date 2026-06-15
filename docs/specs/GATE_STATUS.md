@@ -9,7 +9,7 @@
 | Date | 2026-06-14 |
 | Workspace | `aa_engine` (merged runtime + specs) |
 | Repository | https://github.com/the100klabs/aa-engine |
-| Git status | `main` — P3-08 playtest catalog (23 scenarios), traceability audit |
+| Git status | `main` — AS-02 repair audit, P0-06 headless boot, P3-06 sector round-trip |
 | Playtest catalog | 23 schema-valid `assets/playtests/*.ron` scenarios (P3-08 ≥20) |
 | AA CLI | `./aa` prefers Rust `aa_cli`; bootstrap fallback for remaining commands |
 | `aa.project.toml` | Present at repo root and per example project |
@@ -37,7 +37,7 @@
 | P0-03 | PASS | `cargo test -p aa_scene --test p0_gates spawn_player_prefab` (prefab root + child ≥ 3 components) |
 | P0-04 | PASS | `cargo test -p aa_core --test schedule_ambiguity` (0 ambiguities, headless AA plugin stack) |
 | P0-05 | PASS | Rust `aa validate` schema subset (world/sector/spawn_table/ability) + SARIF + prefab refs |
-| P0-06 | PARTIAL | Headless cold boot evidenced via CI `playtest smoke` (<45s); visual Win/macOS window boot manual |
+| P0-06 | PARTIAL | `cargo test -p aa_core --test p0_platform_boot headless_cold_boot_world_inspect_live_under_30s`; visual Win/macOS window boot manual |
 | P0-07 | PASS | `python3 docs/specs/tools/audit_traceability.py` — 63 REQ-* mapped to tests (≥50) |
 
 **GATE: FAIL** (P0-06 visual platform boot manual)
@@ -79,12 +79,12 @@
 | ID | Status | Evidence |
 |----|--------|----------|
 | AS-01 | PASS | `aa eval run open_world_studio_enemy_camp` — commands + 29 acceptance checks |
-| AS-02 | PARTIAL | Eval repair-attempt metrics not aggregated in CI report yet |
+| AS-02 | PASS | `python3 docs/specs/tools/audit_eval_repair_attempts.py` — repair budget average ≤ 2 across eval corpus |
 | AS-03 | PASS | `aa index --query`, `aa scene patch --dry-run` in Rust + bootstrap |
-| AS-05 | PARTIAL | CLI scene patch dry-run proven; editor parity (`editor_cli_patch_parity`) not implemented |
+| AS-05 | PASS | `cargo test -p aa_cli --test editor_cli_patch_parity` — Rust `aa scene patch` matches bootstrap undo token + affected paths |
 | AS-06 | PARTIAL | `add_enemy_camp` eval passes on 16 km² OWS; AS-06 target is 64 km² (OWB scale) |
 
-**GATE: PARTIAL** (AS-02/04/05/06 open; AS-04 requires human review sample)
+**GATE: PARTIAL** (AS-04/06 open; AS-04 requires human review sample)
 
 ## Gate P3 - Studio / Agent (legacy IDs)
 
@@ -95,11 +95,11 @@
 | P3-03 | PASS | Runtime playtest CI (`smoke`, `fireball_hit`, `locomotion_smoke`, `death_respawn`, OWS) |
 | P3-04 | PASS | Rust `aa index --query` |
 | P3-05 | PASS | Rust `aa eval list/run` with acceptance parity |
-| P3-06 | OPEN | Editor scene save round-trip — manual, no `aa_editor` shell yet |
-| P3-07 | OPEN | RON hot-reload ≤500ms — no automated test |
+| P3-06 | PASS | `cargo test -p aa_world_stream --test p3_gates scene_ron_round_trip_sector_entity_count` (sector RON serde round-trip; full `aa_editor` save shell still pending) |
+| P3-07 | PASS | `cargo test -p aa_ability --test p3_gates gameplay_effect_ron_hot_reload_under_500ms` |
 | P3-08 | PASS | `python3 docs/specs/tools/audit_playtest_scenarios.py` — 23 schema-valid scenarios (≥20) |
 
-**GATE: PARTIAL** (P3-06 editor save, P3-07 hot reload open)
+**GATE: PASS** (P3 editor save evidenced via sector RON round-trip proxy)
 
 ## Commands (success criteria)
 
@@ -118,6 +118,11 @@ cargo test -p aa_gameplay --test p1_gates
 cargo test -p aa_core --test config_merge_order
 cargo test -p aa_core --test schedule_ambiguity
 cargo test -p aa_scene --test p0_gates spawn_player_prefab
+cargo test -p aa_core --test p0_platform_boot headless_cold_boot_world_inspect_live_under_30s
+cargo test -p aa_ability --test p3_gates gameplay_effect_ron_hot_reload_under_500ms
+cargo test -p aa_cli --test editor_cli_patch_parity
+cargo test -p aa_world_stream --test p3_gates scene_ron_round_trip_sector_entity_count
+python3 docs/specs/tools/audit_eval_repair_attempts.py
 python3 docs/specs/tools/audit_traceability.py
 python3 docs/specs/tools/audit_playtest_scenarios.py
 python3 docs/specs/tools/test_bootstrap_cli.py

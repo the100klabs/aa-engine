@@ -12,6 +12,7 @@ dependencies = [
  "criterion",
  "ron 0.8.1",
  "serde",
+ "tempfile",
  "thiserror 2.0.18",
 ]
 
@@ -46,6 +47,7 @@ dependencies = [
  "ron 0.8.1",
  "serde",
  "serde_json",
+ "sha2",
  "thiserror 2.0.18",
  "toml",
  "walkdir",

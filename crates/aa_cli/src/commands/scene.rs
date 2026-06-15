@@ -96,7 +96,8 @@ pub fn patch(scene: &str, patch: &str, dry_run: bool, json: bool) -> ExitCode {
     let repo = find_workspace_root();
     let scene_path = resolve_path(&repo, scene);
     let patch_path = resolve_path(&repo, patch);
-    let scene_rel = rel_path(&repo, &scene_path);
+    let (project_root, scene_project_path) = infer_project_root_from_scene(&scene_path);
+    let patch_diag_path = rel_path(&project_root, &patch_path);
     let mut diagnostics = Vec::new();
 
     if !dry_run {
@@ -104,15 +105,15 @@ pub fn patch(scene: &str, patch: &str, dry_run: bool, json: bool) -> ExitCode {
             code: "DRY_RUN_REQUIRED".into(),
             severity: "error".into(),
             message: "Scene patch only supports --dry-run.".into(),
-            path: Some(scene_rel.clone()),
+            path: Some(scene_project_path.clone()),
         });
     }
     if !scene_path.is_file() {
         diagnostics.push(SceneDiagnostic {
             code: "FILE_MISSING".into(),
             severity: "error".into(),
-            message: format!("Scene target does not exist: {scene_rel}"),
-            path: Some(scene_rel.clone()),
+            message: format!("Scene target does not exist: {scene_project_path}"),
+            path: Some(scene_project_path.clone()),
         });
     }
 
@@ -122,12 +123,32 @@ pub fn patch(scene: &str, patch: &str, dry_run: bool, json: bool) -> ExitCode {
         .get("id")
         .and_then(|v| v.as_str())
         .unwrap_or("unknown");
-    let target = patch_value
+    let mut target = patch_value
         .pointer("/target/path")
         .and_then(|v| v.as_str())
-        .unwrap_or(&scene_rel);
+        .unwrap_or(&scene_project_path)
+        .to_string();
 
-    let mut affected_files = vec![target.to_string()];
+    if !project_path_safe(&target) {
+        diagnostics.push(SceneDiagnostic {
+            code: "SCENE_PATCH_INVALID".into(),
+            severity: "error".into(),
+            message: format!("Patch target path is outside the project allowlist: {target}"),
+            path: Some(patch_diag_path.clone()),
+        });
+    }
+    if target != scene_project_path {
+        diagnostics.push(SceneDiagnostic {
+            code: "TARGET_MISMATCH".into(),
+            severity: "error".into(),
+            message: format!("Patch target {target} does not match --scene {scene_project_path}"),
+            path: Some(patch_diag_path.clone()),
+        });
+    } else {
+        target = scene_project_path.clone();
+    }
+
+    let mut affected_files = vec![target.clone()];
     let mut affected_entities = Vec::new();
     let mut op_reports = Vec::new();
     if let Some(ops) = patch_value.get("ops").and_then(|v| v.as_array()) {
@@ -146,6 +167,21 @@ pub fn patch(scene: &str, patch: &str, dry_run: bool, json: bool) -> ExitCode {
                 {
                     op_files.push(prefab.to_string());
                     affected_files.push(prefab.to_string());
+                    if !project_path_safe(prefab) {
+                        diagnostics.push(SceneDiagnostic {
+                            code: "SCENE_PATCH_INVALID".into(),
+                            severity: "error".into(),
+                            message: format!("Patch op path is outside the project allowlist: {prefab}"),
+                            path: Some(patch_diag_path.clone()),
+                        });
+                    } else if !project_root.join(prefab).is_file() {
+                        diagnostics.push(SceneDiagnostic {
+                            code: "REF_MISSING".into(),
+                            severity: "error".into(),
+                            message: format!("Patch op referenced file does not exist: {prefab}"),
+                            path: Some(patch_diag_path.clone()),
+                        });
+                    }
                 }
                 op_reports.push(serde_json::json!({
                     "index": index,
@@ -162,8 +198,11 @@ pub fn patch(scene: &str, patch: &str, dry_run: bool, json: bool) -> ExitCode {
     affected_entities.sort();
     affected_entities.dedup();
 
-    let token_input = format!("{patch_id}|{target}|{}", affected_files.join("|"));
-    let undo_token = format!("undo:dry-run:{}", &md5_hex(&token_input)[..16]);
+    let mut token_parts = vec![patch_id.to_string(), target.clone()];
+    token_parts.extend(affected_files.clone());
+    token_parts.extend(affected_entities.clone());
+    let token_input = token_parts.join("|");
+    let undo_token = format!("undo:dry-run:{}", sha256_prefix16(&token_input));
 
     let ok = !diagnostics.iter().any(|d| d.severity == "error");
     let result = serde_json::json!({
@@ -312,10 +351,37 @@ fn rel_path(repo: &Path, path: &Path) -> String {
         .replace('\\', "/")
 }
 
-fn md5_hex(input: &str) -> String {
-    use std::collections::hash_map::DefaultHasher;
-    use std::hash::{Hash, Hasher};
-    let mut hasher = DefaultHasher::new();
-    input.hash(&mut hasher);
-    format!("{:016x}", hasher.finish())
+fn infer_project_root_from_scene(scene_path: &Path) -> (PathBuf, String) {
+    let resolved = scene_path
+        .canonicalize()
+        .unwrap_or_else(|_| scene_path.to_path_buf());
+    let normalized = resolved.to_string_lossy().replace('\\', "/");
+    if let Some(idx) = normalized.find("/assets/") {
+        let root = PathBuf::from(&normalized[..idx]);
+        let rel = normalized[idx + 1..].to_string();
+        return (root, rel);
+    }
+    let parent = resolved.parent().unwrap_or(&resolved).to_path_buf();
+    let name = resolved
+        .file_name()
+        .map(|s| s.to_string_lossy().to_string())
+        .unwrap_or_else(|| "scene".into());
+    (parent, name)
+}
+
+fn project_path_safe(path: &str) -> bool {
+    !path.is_empty()
+        && !path.starts_with('/')
+        && !path.contains('\\')
+        && !path.split('/').any(|part| part == "..")
+}
+
+fn sha256_prefix16(input: &str) -> String {
+    use sha2::{Digest, Sha256};
+    let digest = Sha256::digest(input.as_bytes());
+    digest
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect::<String>()[..16]
+        .to_string()
 }

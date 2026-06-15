@@ -28,14 +28,22 @@ jobs:
         run: cargo test -p aa_scene --test p0_gates spawn_player_prefab
       - name: P0 schedule ambiguity test
         run: cargo test -p aa_core --test schedule_ambiguity
+      - name: P0 headless platform boot test
+        run: cargo test -p aa_core --test p0_platform_boot headless_cold_boot_world_inspect_live_under_30s
       - name: P1 ability unit tests
         run: cargo test -p aa_ability --test p1_gates
+      - name: P3 effect hot reload test
+        run: cargo test -p aa_ability --test p3_gates gameplay_effect_ron_hot_reload_under_500ms
+      - name: AS-05 editor CLI patch parity
+        run: cargo test -p aa_cli --test editor_cli_patch_parity
       - name: P1 experience integration test
         run: cargo test -p aa_experience --test p1_gates
       - name: P1 gameplay integration test
         run: cargo test -p aa_gameplay --test p1_gates
       - name: P1 gameplay death loop test
         run: cargo test -p aa_gameplay --test death_loop
+      - name: P3 sector scene round-trip test
+        run: cargo test -p aa_world_stream --test p3_gates scene_ron_round_trip_sector_entity_count
       - name: World stream unit tests
         run: cargo test -p aa_world_stream
       - name: Playtest smoke scenario
@@ -79,6 +87,8 @@ jobs:
         run: python3 docs/specs/tools/test_bootstrap_cli.py
       - name: Spec traceability audit (P0-07)
         run: python3 docs/specs/tools/audit_traceability.py
+      - name: Eval repair-attempt audit (AS-02)
+        run: python3 docs/specs/tools/audit_eval_repair_attempts.py
       - name: Playtest scenario audit (P3-08)
         run: python3 docs/specs/tools/audit_playtest_scenarios.py
       - name: Validate contract fixtures

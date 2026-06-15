@@ -5,14 +5,14 @@
   "description": "Eval fixture for adding a sector-authored enemy camp through the Cursor-like agent loop.",
   "tier": "open_world_alpha",
   "min_pass_rate": 1.0,
-  "max_repair_attempts": 3,
+  "max_repair_attempts": 2,
   "tasks": [
     {
       "id": "EVAL-OWA-ENEMY-CAMP-001",
       "prompt": "Add a small enemy camp to sector 0/0 in open_world_studio. Use spawn table and AI profile assets, update sector data, keep authored objects within budget, and add a playtest proving the camp spawns and remains performant.",
       "category": "enemy_camp",
       "project": "examples/open_world_studio",
-      "max_repair_attempts": 3,
+      "max_repair_attempts": 2,
       "required_commands": [
         "aa index",
         "aa validate",
