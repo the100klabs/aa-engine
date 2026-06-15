@@ -57,3 +57,20 @@ fn headless_cold_boot_world_inspect_live_under_30s() {
         "headless runtime boot took {elapsed:?}, expected <= 30s"
     );
 }
+
+#[test]
+fn example_platform_boot_configs_exist() {
+    let root = repo_root();
+    let paths = [
+        "examples/demo_game/config/platforms/windows.toml",
+        "examples/demo_game/config/platforms/macos.toml",
+        "examples/demo_game/config/platforms/linux.toml",
+        "examples/open_world_studio/config/platforms/windows.toml",
+        "examples/open_world_studio/config/platforms/macos.toml",
+        "examples/open_world_studio/config/platforms/linux.toml",
+    ];
+    for rel in paths {
+        let path = root.join(rel);
+        assert!(path.is_file(), "missing platform boot config: {}", path.display());
+    }
+}

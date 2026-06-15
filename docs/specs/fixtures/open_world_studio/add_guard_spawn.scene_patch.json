@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "id": "add_guard_spawn_preview",
+  "description": "Dry-run fixture for adding a camp guard spawn prefab to sector 0/0.",
+  "target": {
+    "path": "assets/sectors/sector_0_0.ron",
+    "kind": "sector"
+  },
+  "ops": [
+    {
+      "InstantiatePrefab": {
+        "entity_id": "sector_0_0/camp_guard_spawn_preview",
+        "prefab": "assets/prefabs/camp_guard_spawn.ron",
+        "transform": {
+          "translation": [30.0, 0.0, -22.0],
+          "rotation_euler": [0.0, 90.0, 0.0],
+          "scale": [1.0, 1.0, 1.0]
+        },
+        "reason": "Place guard spawn marker adjacent to the camp fire for the enemy-camp loop."
+      }
+    }
+  ]
+}

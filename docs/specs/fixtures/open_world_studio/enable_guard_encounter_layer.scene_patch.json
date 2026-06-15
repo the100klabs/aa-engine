@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "enable_guard_encounter_layer",
+  "description": "Dry-run fixture for tagging the guard spawn with the encounters data layer.",
+  "target": {
+    "path": "assets/sectors/sector_0_0.ron",
+    "kind": "sector"
+  },
+  "ops": [
+    {
+      "SetDataLayer": {
+        "entity_id": "sector_0_0/camp_guard_spawn_preview",
+        "layer": "encounters",
+        "enabled": true,
+        "reason": "Keep guard spawn controlled by the encounter streaming layer."
+      }
+    }
+  ]
+}

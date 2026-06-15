@@ -1,0 +1,8 @@
+SectorDescriptor(
+    schema_version: 1,
+    id: "sector_-15_-12",
+    coord: (-15, -12),
+    bounds: (min: (-3840.0, 0.0, -3072.0), max: (-3584.0, 256.0, -2816.0)),
+    data_layers: ["terrain", "gameplay", "encounters", "foliage", "audio", "vfx", "nav", "lighting"],
+    entities: [],
+)

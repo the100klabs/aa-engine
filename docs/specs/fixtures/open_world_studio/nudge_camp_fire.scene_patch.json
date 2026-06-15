@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "nudge_camp_fire_preview",
+  "description": "Dry-run fixture for fine-tuning camp fire placement in sector 0/0.",
+  "target": {
+    "path": "assets/sectors/sector_0_0.ron",
+    "kind": "sector"
+  },
+  "ops": [
+    {
+      "SetTransform": {
+        "entity_id": "sector_0_0/camp_fire_preview",
+        "transform": {
+          "translation": [35.5, 0.0, -14.5],
+          "rotation_euler": [0.0, 25.0, 0.0],
+          "scale": [1.0, 1.0, 1.0]
+        },
+        "reason": "Nudge preview campfire slightly toward the encounter anchor."
+      }
+    }
+  ]
+}

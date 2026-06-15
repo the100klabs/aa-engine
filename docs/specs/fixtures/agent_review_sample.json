@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "id": "agent_studio_review_sample_v1",
+  "description": "Human acceptability review corpus for AS-04. Each entry records whether an agent-generated diff was accepted without manual rewrite.",
+  "minimum_accept_rate": 0.8,
+  "reviews": [
+    {
+      "id": "review_add_campfire_patch",
+      "artifact": "docs/specs/fixtures/open_world_studio/add_campfire.scene_patch.json",
+      "kind": "scene_patch",
+      "accepted": true,
+      "reviewer": "studio_fixture",
+      "notes": "Dry-run patch adds camp_fire prefab with encounter layer; undo token matches CLI parity test."
+    },
+    {
+      "id": "review_enemy_camp_spawn_table",
+      "artifact": "examples/open_world_studio/assets/spawn_tables/enemy_camp_sector_0_0.ron",
+      "kind": "spawn_table",
+      "accepted": true,
+      "reviewer": "studio_fixture",
+      "notes": "Enemy camp spawn table authored for sector 0/0; validated by open_world_enemy_camp playtest."
+    },
+    {
+      "id": "review_camp_guard_ai",
+      "artifact": "examples/open_world_studio/assets/ai/camp_guard.ron",
+      "kind": "ai_profile",
+      "accepted": true,
+      "reviewer": "studio_fixture",
+      "notes": "Patrol AI profile referenced by enemy camp eval acceptance."
+    },
+    {
+      "id": "review_elemental_ability",
+      "artifact": "examples/open_world_studio/assets/abilities/basic_ranged_attack.ron",
+      "kind": "ability",
+      "accepted": true,
+      "reviewer": "studio_fixture",
+      "notes": "Elemental ability asset passes eval open_world_studio_elemental_ability."
+    },
+    {
+      "id": "review_rejected_manual_rewrite",
+      "artifact": "docs/specs/fixtures/open_world_studio/bad_target.scene_patch.json",
+      "kind": "scene_patch",
+      "accepted": false,
+      "reviewer": "studio_fixture",
+      "notes": "Synthetic rejected sample: target mismatch required human rewrite before merge."
+    }
+  ]
+}

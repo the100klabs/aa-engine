@@ -310,9 +310,24 @@ mod tests {
             .join("../../examples/open_world_studio");
         let result = inspect_world(&project_root, "open_world_studio", None);
         assert_eq!(result.world, "open_world_studio");
-        assert!(result.sector_count >= 256, "expected 16x16 sector grid");
+        assert!(result.sector_count >= 1024, "expected 32x32 sector grid (64 km²)");
         assert!(result.layers.len() >= 8, "expected at least 8 data layers");
         assert!(!result.layers.is_empty());
         assert!(result.ok, "inspect should resolve sector refs: {:?}", result.diagnostics);
+    }
+
+    #[test]
+    fn inspect_open_world_studio_as06_world_scale() {
+        let project_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../examples/open_world_studio");
+        let result = inspect_world(&project_root, "open_world_studio", None);
+        assert_eq!(result.sector_count, 1024, "AS-06 requires 32x32 sectors");
+        let axis = (result.sector_count as f64).sqrt();
+        // Studio track naming: 16-axis grid => 16 km², 32-axis => 64 km² (see audit_world_scale.py).
+        let area_km2 = (axis / 4.0).powi(2);
+        assert!(
+            (area_km2 - 64.0).abs() < 0.1,
+            "expected 64 km² world (32-axis grid), got {area_km2} km²"
+        );
     }
 }

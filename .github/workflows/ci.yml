@@ -28,8 +28,8 @@ jobs:
         run: cargo test -p aa_scene --test p0_gates spawn_player_prefab
       - name: P0 schedule ambiguity test
         run: cargo test -p aa_core --test schedule_ambiguity
-      - name: P0 headless platform boot test
-        run: cargo test -p aa_core --test p0_platform_boot headless_cold_boot_world_inspect_live_under_30s
+      - name: P0 headless platform boot tests
+        run: cargo test -p aa_core --test p0_platform_boot
       - name: P1 ability unit tests
         run: cargo test -p aa_ability --test p1_gates
       - name: P3 effect hot reload test
@@ -85,10 +85,16 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends pkg-config libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev libx11-dev
       - name: Bootstrap CLI contract tests
         run: python3 docs/specs/tools/test_bootstrap_cli.py
+      - name: Platform boot audit (P0-06)
+        run: python3 docs/specs/tools/audit_platform_boot.py
       - name: Spec traceability audit (P0-07)
         run: python3 docs/specs/tools/audit_traceability.py
       - name: Eval repair-attempt audit (AS-02)
         run: python3 docs/specs/tools/audit_eval_repair_attempts.py
+      - name: Human acceptability audit (AS-04)
+        run: python3 docs/specs/tools/audit_human_acceptability.py
+      - name: World scale audit (AS-06)
+        run: python3 docs/specs/tools/audit_world_scale.py
       - name: Playtest scenario audit (P3-08)
         run: python3 docs/specs/tools/audit_playtest_scenarios.py
       - name: Validate contract fixtures

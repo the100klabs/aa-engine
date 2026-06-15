@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "id": "rejected_oob_campfire",
+  "description": "Agent-generated patch rejected in review: campfire placed outside sector bounds.",
+  "target": {
+    "path": "assets/sectors/sector_0_0.ron",
+    "kind": "sector"
+  },
+  "ops": [
+    {
+      "InstantiatePrefab": {
+        "entity_id": "sector_0_0/camp_fire_oob",
+        "prefab": "assets/prefabs/camp_fire.ron",
+        "transform": {
+          "translation": [400.0, 0.0, -400.0],
+          "rotation_euler": [0.0, 0.0, 0.0],
+          "scale": [1.0, 1.0, 1.0]
+        },
+        "reason": "Agent misread sector bounds and placed the prop far outside the 256m tile."
+      }
+    }
+  ]
+}

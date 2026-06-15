@@ -21,6 +21,30 @@
       "kind": "scene_patch"
     },
     {
+      "id": "add_guard_spawn_scene_patch",
+      "fixture": "docs/specs/fixtures/open_world_studio/add_guard_spawn.scene_patch.json",
+      "schema": "docs/specs/schemas/scene_patch.schema.json",
+      "kind": "scene_patch"
+    },
+    {
+      "id": "nudge_camp_fire_scene_patch",
+      "fixture": "docs/specs/fixtures/open_world_studio/nudge_camp_fire.scene_patch.json",
+      "schema": "docs/specs/schemas/scene_patch.schema.json",
+      "kind": "scene_patch"
+    },
+    {
+      "id": "enable_guard_encounter_layer_scene_patch",
+      "fixture": "docs/specs/fixtures/open_world_studio/enable_guard_encounter_layer.scene_patch.json",
+      "schema": "docs/specs/schemas/scene_patch.schema.json",
+      "kind": "scene_patch"
+    },
+    {
+      "id": "rejected_oob_campfire_scene_patch",
+      "fixture": "docs/specs/fixtures/open_world_studio/rejected_oob_campfire.scene_patch.json",
+      "schema": "docs/specs/schemas/scene_patch.schema.json",
+      "kind": "scene_patch"
+    },
+    {
       "id": "world_inspect_result",
       "fixture": "docs/specs/fixtures/open_world_studio/world_inspect.result.json",
       "schema": "docs/specs/schemas/world_inspect_result.schema.json",

@@ -38,3 +38,13 @@ python3 docs/specs/tools/validate_contract_fixtures.py
 
 This stdlib-only check validates the fixture manifest, applies the schema subset
 used by these contracts, and rejects absolute or parent-directory paths.
+
+## Platform Boot Sign-off (P0-06)
+
+`platform_boot_signoff.json` documents automated Linux CI boot proxies (headless
+world inspect, playtest smoke, platform config merge) and the manual Win/macOS
+visual boot checklist. Audit with:
+
+```sh
+python3 docs/specs/tools/audit_platform_boot.py
+```

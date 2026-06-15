@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "bad_target_preview",
+  "description": "Rejected review sample: patch target does not match scene arg.",
+  "target": {
+    "path": "assets/sectors/sector_9_9.ron",
+    "kind": "sector"
+  },
+  "ops": [
+    {
+      "SetDataLayer": {
+        "entity_id": "sector_0_0/camp_fire_preview",
+        "layer": "encounters",
+        "enabled": true
+      }
+    }
+  ]
+}

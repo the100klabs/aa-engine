@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
-"""Generate a 16x16 sector grid (16 km²) with 8 data layers for open_world_studio."""
+"""Generate an open_world_studio sector grid with 8 data layers.
+
+Default: 32x32 sectors @ 256m = 64 km² (AS-06 / OWB scale).
+Use --half 8 for the legacy 16x16 / 16 km² OWA grid.
+"""
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -13,7 +18,7 @@ WORLD = OWS / "assets/worlds/open_world_studio.ron"
 
 SECTOR_SIZE = 256.0
 HEIGHT = 256.0
-HALF = 8  # coords -8..7 => 16 sectors per axis => 256 sectors
+DEFAULT_HALF = 16  # coords -16..15 => 32 sectors per axis => 1024 sectors
 LAYERS = [
     "terrain",
     "gameplay",
@@ -71,9 +76,11 @@ def sector_content(x: int, y: int) -> str:
 """
 
 
-def world_content(sectors: list[tuple[int, int]]) -> str:
-    min_bound = -HALF * SECTOR_SIZE
-    max_bound = HALF * SECTOR_SIZE
+def world_content(sectors: list[tuple[int, int]], half: int) -> str:
+    min_bound = -half * SECTOR_SIZE
+    max_bound = half * SECTOR_SIZE
+    axis = half * 2
+    area_km2 = int((axis * SECTOR_SIZE / 1000.0) ** 2)
     layer_entries = []
     for layer in LAYERS:
         default = "active" if layer in {"terrain", "gameplay", "encounters", "nav"} else "loaded"
@@ -102,7 +109,7 @@ def world_content(sectors: list[tuple[int, int]]) -> str:
     schema_version: 1,
     id: "open_world_studio",
     display_name: "Open World Studio",
-    description: "16 km2 streamed open-world prototype for AAA studio track.",
+    description: "{area_km2} km2 streamed open-world prototype for AAA studio track.",
     bounds_m: (min: ({min_bound:.1f}, 0.0, {min_bound:.1f}), max: ({max_bound:.1f}, {HEIGHT:.1f}, {max_bound:.1f})),
     sector_size_m: {SECTOR_SIZE:.1f},
     active_window: (
@@ -140,15 +147,14 @@ def world_content(sectors: list[tuple[int, int]]) -> str:
 """
 
 
-def main() -> None:
+def generate(half: int) -> int:
     SECTORS.mkdir(parents=True, exist_ok=True)
     coords: list[tuple[int, int]] = []
-    for x in range(-HALF, HALF):
-        for y in range(-HALF, HALF):
+    for x in range(-half, half):
+        for y in range(-half, half):
             coords.append((x, y))
             path = SECTORS / f"sector_{x}_{y}.ron"
             path.write_text(sector_content(x, y), encoding="utf-8")
-    # Remove stale sector files outside the new grid.
     for path in SECTORS.glob("sector_*.ron"):
         stem = path.stem
         parts = stem.split("_")
@@ -158,10 +164,25 @@ def main() -> None:
             sx, sy = int(parts[1]), int(parts[2])
         except ValueError:
             continue
-        if not (-HALF <= sx < HALF and -HALF <= sy < HALF):
+        if not (-half <= sx < half and -half <= sy < half):
             path.unlink()
-    WORLD.write_text(world_content(coords), encoding="utf-8")
-    print(f"generated {len(coords)} sectors and {WORLD.relative_to(REPO)}")
+    WORLD.write_text(world_content(coords, half), encoding="utf-8")
+    print(f"generated {len(coords)} sectors ({half * 2}x{half * 2}) and {WORLD.relative_to(REPO)}")
+    return len(coords)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--half",
+        type=int,
+        default=DEFAULT_HALF,
+        help="half-axis sector count (default 16 => 32x32 / 64 km²)",
+    )
+    args = parser.parse_args()
+    if args.half < 1 or args.half > 32:
+        raise SystemExit("--half must be between 1 and 32")
+    generate(args.half)
 
 
 if __name__ == "__main__":

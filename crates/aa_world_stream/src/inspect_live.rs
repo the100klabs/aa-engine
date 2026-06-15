@@ -150,7 +150,7 @@ mod tests {
         let project_root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../examples/open_world_studio");
         let result = inspect_world_live(&project_root, "open_world_studio");
         assert_eq!(result.world, "open_world_studio");
-        assert!(result.sector_count >= 256);
+        assert!(result.sector_count >= 1024, "expected 32x32 sector grid (64 km²)");
         let live = result.live.expect("live inspect must include registry snapshot");
         assert!(live.connected);
         assert!(live.streaming_sources.contains(&"player_0".to_string()));

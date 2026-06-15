@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "id": "platform_boot_signoff_v1",
+  "gate": "P0-06",
+  "gate_status": "partial",
+  "normative_criterion": "window opens Win + macOS ≤ 30s from cold",
+  "description": "P0-06 platform boot evidence: automated Linux CI headless proxies plus manual visual checklist for Win/macOS.",
+  "waiver": "Linux CI headless proxies satisfy automated gate evidence per 04_ACCEPTANCE_GATES.md; visual Win/macOS boot remains manual until signed off.",
+  "automated_evidence": [
+    {
+      "id": "headless_live_inspect",
+      "command": "cargo test -p aa_core --test p0_platform_boot headless_cold_boot_world_inspect_live_under_30s",
+      "platform": "linux_ci",
+      "threshold_secs": 30,
+      "status": "pass",
+      "description": "Cold-build aa_cli then world inspect --live; asserts ok JSON and boot ≤ 30s."
+    },
+    {
+      "id": "platform_configs",
+      "command": "cargo test -p aa_core --test p0_platform_boot example_platform_boot_configs_exist",
+      "platform": "linux_ci",
+      "threshold_secs": 30,
+      "status": "pass",
+      "description": "All demo_game and open_world_studio config/platforms/*.toml files exist."
+    },
+    {
+      "id": "platform_config_merge",
+      "command": "cargo test -p aa_core --test config_merge_order platform_layer_applies_when_present",
+      "platform": "linux_ci",
+      "threshold_secs": 30,
+      "status": "pass",
+      "description": "REQ-GLOBAL-050 platform layer loads per host OS without breaking config merge."
+    },
+    {
+      "id": "playtest_smoke_ci",
+      "command": "cargo run -p aa_cli -- playtest --project examples/demo_game --scenario smoke --duration 12",
+      "platform": "linux_ci",
+      "threshold_secs": 45,
+      "status": "pass",
+      "description": "CI playtest smoke boots headless combat slice and runs assertions (P3-03 aligned)."
+    }
+  ],
+  "platform_configs": {
+    "paths": [
+      "examples/demo_game/config/platforms/windows.toml",
+      "examples/demo_game/config/platforms/macos.toml",
+      "examples/demo_game/config/platforms/linux.toml",
+      "examples/open_world_studio/config/platforms/windows.toml",
+      "examples/open_world_studio/config/platforms/macos.toml",
+      "examples/open_world_studio/config/platforms/linux.toml"
+    ]
+  },
+  "manual_checklist": [
+    {
+      "id": "windows_visual_boot",
+      "platform": "windows",
+      "criterion": "Cold launch demo_game window visible within 30s",
+      "status": "pending"
+    },
+    {
+      "id": "macos_visual_boot",
+      "platform": "macos",
+      "criterion": "Cold launch demo_game window visible within 30s",
+      "status": "pending"
+    }
+  ]
+}
