@@ -6,7 +6,10 @@ use bevy::prelude::*;
 use crate::assets::SectorLifecycle;
 use crate::inspect::{inspect_world, LiveStateJson, WorldInspectResult};
 use crate::plugin::AaWorldStreamPlugin;
-use crate::registry::{project_relative_path, resolve_world_asset_path, SectorRegistry};
+use crate::registry::{
+    load_world_descriptor_from_disk, project_relative_path, resolve_world_asset_path,
+    SectorRegistry,
+};
 use crate::streaming::{StreamingSource, StreamingSourceKind};
 
 /// Runs a minimal headless streaming session and merges registry state into inspect output.
@@ -35,11 +38,26 @@ fn snapshot_live_registry(project_root: &Path, world_asset: &str) -> LiveStateJs
         })
         .add_systems(Startup, spawn_inspect_streaming_source);
 
+    if let Ok(world_data) = load_world_descriptor_from_disk(project_root, world_asset) {
+        let handle = app
+            .world_mut()
+            .resource_mut::<Assets<crate::assets::WorldDescriptorAsset>>()
+            .add(world_data);
+        let world = app
+            .world()
+            .resource::<Assets<crate::assets::WorldDescriptorAsset>>()
+            .get(&handle)
+            .expect("sync-loaded world must be present")
+            .clone();
+        app.world_mut()
+            .insert_resource(SectorRegistry::from_world(world_asset, handle, &world));
+    }
+
     const MIN_FRAMES: u32 = 10;
-    const MAX_FRAMES: u32 = 120;
+    const MAX_FRAMES: u32 = 300;
     for frame in 0..MAX_FRAMES {
         app.update();
-        if frame >= MIN_FRAMES && registry_settled(&app) {
+        if frame >= MIN_FRAMES && registry_has_active_sectors(&app) {
             break;
         }
     }
@@ -58,26 +76,15 @@ fn snapshot_live_registry(project_root: &Path, world_asset: &str) -> LiveStateJs
     }
 }
 
-fn registry_settled(app: &App) -> bool {
-    let Some(registry) = app.world().get_resource::<SectorRegistry>() else {
-        return false;
-    };
-
-    let mut saw_active = false;
-    let mut has_pending = false;
-    for state in registry.sectors.values() {
-        match state.lifecycle {
-            SectorLifecycle::Active => saw_active = true,
-            SectorLifecycle::Queued
-            | SectorLifecycle::Loading
-            | SectorLifecycle::Activating
-            | SectorLifecycle::Loaded
-            | SectorLifecycle::Deactivating => has_pending = true,
-            _ => {}
-        }
-    }
-
-    saw_active && !has_pending
+fn registry_has_active_sectors(app: &App) -> bool {
+    app.world()
+        .get_resource::<SectorRegistry>()
+        .is_some_and(|registry| {
+            registry
+                .sectors
+                .values()
+                .any(|state| state.lifecycle == SectorLifecycle::Active)
+        })
 }
 
 fn spawn_inspect_streaming_source(mut commands: Commands) {
